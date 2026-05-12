@@ -102,34 +102,91 @@ export default function Folders() {
 
                             {folders.map((item, index) => (
 
-                                <tr key={item._id}>
+                                <>
 
-                                    <td>{index + 1}</td>
+                                    <tr key={item._id}>
 
-                                    <td>{item.name}</td>
+                                        <td>{index + 1}</td>
 
-                                    <td>
-                                        {item.categoryId?.name}
-                                    </td>
+                                        <td>{item.name}</td>
 
-                                    <td>
+                                        <td>{item.categoryId?.name}</td>
 
-                                        <button
-                                            className="btn btn-sm btn-outline-danger"
-                                            onClick={() => {
+                                        <td>
 
-                                                if (window.confirm("Delete this folder?")) {
-                                                    deleteFolder(item._id)
-                                                }
+                                            <button
+                                                className="btn btn-sm btn-outline-danger"
+                                                onClick={() => {
 
-                                            }}
-                                        >
-                                            <i className="ri-delete-bin-line"></i>
-                                        </button>
+                                                    if (window.confirm("Delete this folder?")) {
 
-                                    </td>
+                                                        deleteFolder(item._id)
 
-                                </tr>
+                                                    }
+
+                                                }}
+                                            >
+                                                <i className="ri-delete-bin-line"></i>
+                                            </button>
+
+                                        </td>
+
+                                    </tr>
+
+                                    <tr>
+
+                                        <td colSpan="4">
+
+                                            <div className="p-3 bg-light rounded">
+
+                                                <h6 className="mb-3">
+                                                    Uploaded PDFs
+                                                </h6>
+
+                                                {item.files?.length > 0 ? (
+
+                                                    item.files.map((file) => (
+
+                                                        <div
+                                                            key={file._id}
+                                                            className="d-flex justify-content-between align-items-center border rounded p-2 mb-2"
+                                                        >
+
+                                                            <div>
+
+                                                                <i className="ri-file-pdf-line text-danger me-2"></i>
+
+                                                                {file.title}
+
+                                                            </div>
+
+                                                            <a
+                                                                href={file.fileUrl}
+                                                                target="_blank"
+                                                                className="btn btn-sm btn-primary"
+                                                            >
+                                                                View
+                                                            </a>
+
+                                                        </div>
+
+                                                    ))
+
+                                                ) : (
+
+                                                    <p className="mb-0">
+                                                        No PDFs uploaded
+                                                    </p>
+
+                                                )}
+
+                                            </div>
+
+                                        </td>
+
+                                    </tr>
+
+                                </>
 
                             ))}
 

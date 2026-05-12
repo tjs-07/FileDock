@@ -5,6 +5,7 @@ const cors = require("cors");
 
 const Category = require("./models/Category");
 const Folder = require("./models/Folder");
+const File = require("./models/File");
 
 const app = express();
 
@@ -22,7 +23,39 @@ mongoose.connect(process.env.MONGO_URI)
     console.log(err);
 });
 
+
+const multer = require("multer");
+const path = require("path");
+
+
+
+const storage = multer.diskStorage({
+
+    destination: (req, file, cb) => {
+
+        cb(null, "uploads/");
+
+    },
+
+    filename: (req, file, cb) => {
+
+        cb(
+            null,
+            Date.now() + path.extname(file.originalname)
+        );
+
+    }
+
+});
+
+const upload = multer({ storage });
+
+
+app.use("/uploads", express.static("uploads"));
+
+
 // ADD CATEGORY
+
 app.post("/category", async (req, res) => {
 
     try {
@@ -95,36 +128,55 @@ app.delete("/category/:id", async (req, res) => {
 
 
 // ADD FOLDER
-app.post("/folder", async (req, res) => {
+app.post(
+    "/folder",
+    upload.array("pdfs"),
+    async (req, res) => {
 
-    try {
+        try {
 
-        const folder = new Folder({
+            const folder = new Folder({
 
-            name: req.body.name,
-            categoryId: req.body.categoryId
+                name: req.body.name,
+                categoryId: req.body.categoryId
 
-        });
+            });
 
-        await folder.save();
+            await folder.save();
 
-        res.json({
-            success: true,
-            message: "Folder Added",
-            data: folder
-        });
+            if (req.files.length > 0) {
 
-    } catch (error) {
+                const filesData = req.files.map((file) => ({
 
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+                    title: file.originalname,
+
+                    fileUrl:
+                        `${req.protocol}://${req.get("host")}/uploads/${file.filename}`,
+
+                    folderId: folder._id
+
+                }));
+
+                await File.insertMany(filesData);
+
+            }
+
+            res.json({
+                success: true,
+                message: "Folder Added"
+            });
+
+        } catch (error) {
+
+            res.status(500).json({
+                success: false,
+                message: error.message
+            });
+
+        }
 
     }
-
-});
-
+);
 
 // GET FOLDERS
 app.get("/folder", async (req, res) => {
@@ -134,7 +186,26 @@ app.get("/folder", async (req, res) => {
         const folders = await Folder.find()
             .populate("categoryId");
 
-        res.json(folders);
+        const finalData = await Promise.all(
+
+            folders.map(async (folder) => {
+
+                const files = await File.find({
+                    folderId: folder._id
+                });
+
+                return {
+
+                    ...folder._doc,
+                    files
+
+                };
+
+            })
+
+        );
+
+        res.json(finalData);
 
     } catch (error) {
 

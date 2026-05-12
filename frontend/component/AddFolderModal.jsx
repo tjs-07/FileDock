@@ -16,6 +16,8 @@ export default function AddFolderModal({
 
     const [categories, setCategories] = useState([]);
 
+    const [pdfs, setPdfs] = useState([]);
+
     const getCategories = async () => {
 
         try {
@@ -44,12 +46,21 @@ export default function AddFolderModal({
 
         try {
 
+            const formData = new FormData();
+
+            formData.append("name", name);
+
+            formData.append("categoryId", categoryId);
+
+            for (let i = 0; i < pdfs.length; i++) {
+
+                formData.append("pdfs", pdfs[i]);
+
+            }
+
             await axios.post(
                 `${process.env.NEXT_PUBLIC_API_URL}/folder`,
-                {
-                    name,
-                    categoryId
-                }
+                formData
             );
 
             refreshFolders();
@@ -149,7 +160,29 @@ export default function AddFolderModal({
                             type="file"
                             className="form-control"
                             accept=".pdf"
+                            multiple
+                            onChange={(e) => setPdfs(e.target.files)}
                         />
+                        {pdfs.length > 0 && (
+
+                            <div className="mt-2">
+
+                                {Array.from(pdfs).map((file, index) => (
+
+                                    <div
+                                        key={index}
+                                        className="border rounded p-2 mb-2"
+                                    >
+                                        <i className="ri-file-pdf-line text-danger me-2"></i>
+
+                                        {file.name}
+                                    </div>
+
+                                ))}
+
+                            </div>
+
+                        )}
 
                     </div>
 
