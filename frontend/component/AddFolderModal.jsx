@@ -139,6 +139,19 @@ export default function AddFolderModal({
                         </select>
 
                     </div>
+                    <div className="mb-3">
+
+                        <label className="form-label">
+                            Upload PDF
+                        </label>
+
+                        <input
+                            type="file"
+                            className="form-control"
+                            accept=".pdf"
+                        />
+
+                    </div>
 
                     <div className="d-flex justify-content-end gap-2">
 
