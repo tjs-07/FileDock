@@ -5,7 +5,7 @@ const cors = require("cors");
 
 const Category = require("./models/Category");
 const Folder = require("./models/Folder");
-const File = require("./models/File");
+const File = require("./models/Files");
 
 const app = express();
 
