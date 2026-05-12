@@ -18,8 +18,8 @@ export default function Category() {
         try {
 
             const response = await axios.get(
-   `${process.env.NEXT_PUBLIC_API_URL}/category`
-);
+                `${process.env.NEXT_PUBLIC_API_URL}/category`
+            );
 
             setCategories(response.data);
 
@@ -36,8 +36,8 @@ export default function Category() {
         try {
 
             const response = await axios.delete(
-   `${process.env.NEXT_PUBLIC_API_URL}/category/${id}`
-);
+                `${process.env.NEXT_PUBLIC_API_URL}/category/${id}`
+            );
 
             console.log(response.data);
 

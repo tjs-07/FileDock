@@ -11,6 +11,8 @@ export default function Folders() {
 
     const [folders, setFolders] = useState([]);
 
+    const [openFolder, setOpenFolder] = useState(null);
+
     const getFolders = async () => {
 
         try {
@@ -104,11 +106,36 @@ export default function Folders() {
 
                                 <>
 
-                                    <tr key={item._id}>
+                                    <tr key={item._id}
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() => {
+                                            if (openFolder === item._id) {
+                                                setOpenFolder(null);
+                                            } else {
+                                                setOpenFolder(item._id);
+                                            }
+                                        }}
+                                    >
 
                                         <td>{index + 1}</td>
 
-                                        <td>{item.name}</td>
+                                        <td>
+
+                                            <div className="d-flex align-items-center gap-2">
+
+                                                <i
+                                                    className={
+                                                        openFolder === item._id
+                                                            ? "ri-arrow-down-s-line"
+                                                            : "ri-arrow-right-s-line"
+                                                    }
+                                                ></i>
+
+                                                {item.name}
+
+                                            </div>
+
+                                        </td>
 
                                         <td>{item.categoryId?.name}</td>
 
@@ -133,58 +160,62 @@ export default function Folders() {
 
                                     </tr>
 
-                                    <tr>
+                                    {openFolder === item._id && (
 
-                                        <td colSpan="4">
+                                        <tr>
 
-                                            <div className="p-3 bg-light rounded">
+                                            <td colSpan="4">
 
-                                                <h6 className="mb-3">
-                                                    Uploaded PDFs
-                                                </h6>
+                                                <div className="p-3 bg-light rounded">
 
-                                                {item.files?.length > 0 ? (
+                                                    <h6 className="mb-3">
+                                                        Uploaded PDFs
+                                                    </h6>
 
-                                                    item.files.map((file) => (
+                                                    {item.files?.length > 0 ? (
 
-                                                        <div
-                                                            key={file._id}
-                                                            className="d-flex justify-content-between align-items-center border rounded p-2 mb-2"
-                                                        >
+                                                        item.files.map((file) => (
 
-                                                            <div>
+                                                            <div
+                                                                key={file._id}
+                                                                className="d-flex justify-content-between align-items-center border rounded p-2 mb-2"
+                                                            >
 
-                                                                <i className="ri-file-pdf-line text-danger me-2"></i>
+                                                                <div>
 
-                                                                {file.title}
+                                                                    <i className="ri-file-pdf-line text-danger me-2"></i>
+
+                                                                    {file.title}
+
+                                                                </div>
+
+                                                                <a
+                                                                    href={file.fileUrl}
+                                                                    target="_blank"
+                                                                    className="btn btn-sm btn-primary"
+                                                                >
+                                                                    View
+                                                                </a>
 
                                                             </div>
 
-                                                            <a
-                                                                href={file.fileUrl}
-                                                                target="_blank"
-                                                                className="btn btn-sm btn-primary"
-                                                            >
-                                                                View
-                                                            </a>
+                                                        ))
 
-                                                        </div>
+                                                    ) : (
 
-                                                    ))
+                                                        <p className="mb-0">
+                                                            No PDFs uploaded
+                                                        </p>
 
-                                                ) : (
+                                                    )}
 
-                                                    <p className="mb-0">
-                                                        No PDFs uploaded
-                                                    </p>
+                                                </div>
 
-                                                )}
+                                            </td>
 
-                                            </div>
+                                        </tr>
 
-                                        </td>
-
-                                    </tr>
+                                    )}
 
                                 </>
 
