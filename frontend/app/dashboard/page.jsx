@@ -52,7 +52,7 @@ export default function Dashboard() {
             <div className="mb-4">
 
                 <h3 className="mb-1">
-                    Welcome Back 👋
+                    Welcome Back 
                 </h3>
 
                 <p className="text-muted mb-0">
