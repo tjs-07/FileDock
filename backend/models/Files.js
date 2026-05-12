@@ -13,4 +13,4 @@
 
   });
 
-  module.exports = mongoose.model("File", fileSchema);
+  module.exports = mongoose.model("Files", fileSchema);
