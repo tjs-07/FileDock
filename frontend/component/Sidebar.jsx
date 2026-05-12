@@ -1,24 +1,37 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Sidebar() {
+
+    const pathname = usePathname();
+
     return (
+
         <aside
             id="layout-menu"
             className="layout-menu menu-vertical menu bg-menu-theme card"
         >
 
             {/* LOGO */}
+
             <div className="app-brand demo mb-4">
 
                 <Link
                     href="/dashboard"
                     className="app-brand-link d-flex align-items-center"
                 >
-                    <span className="app-brand-text demo menu-text fw-semibold ms-2">
-                        Dashboard
-                    </span>
+
+                    <img
+                        src='/assets/img/logo.png'
+                        alt="Logo"
+                        style={{
+                            height: "40px",
+                            width: "auto"
+                        }}
+                    />
+
                 </Link>
 
             </div>
@@ -26,38 +39,69 @@ export default function Sidebar() {
             <div className="menu-inner-shadow mt-3"></div>
 
             {/* MENU */}
+
             <ul className="menu-inner py-1">
 
-                <li className="menu-item active ">
+                {/* DASHBOARD */}
+
+                <li className={`menu-item ${pathname === "/dashboard" ? "active" : ""}`}>
+
                     <Link href="/dashboard" className="menu-link">
+
                         <i className="menu-icon tf-icons ri-home-smile-line"></i>
+
                         <div>Dashboard</div>
+
                     </Link>
+
                 </li>
 
-                <li className="menu-item">
+                {/* CATEGORY */}
+
+                <li className={`menu-item ${pathname === "/category" ? "active" : ""}`}>
+
                     <Link href="/category" className="menu-link">
+
                         <i className="menu-icon tf-icons ri-layout-2-line"></i>
+
                         <div>Category</div>
+
                     </Link>
+
                 </li>
 
-                <li className="menu-item">
+                {/* FOLDERS */}
+
+                <li className={`menu-item ${pathname === "/folders" ? "active" : ""}`}>
+
                     <Link href="/folders" className="menu-link">
+
                         <i className="menu-icon tf-icons ri-folder-line"></i>
+
                         <div>Folders</div>
+
                     </Link>
+
                 </li>
 
-                <li className="menu-item">
+                {/* FILES */}
+
+                <li className={`menu-item ${pathname === "/files" ? "active" : ""}`}>
+
                     <Link href="/files" className="menu-link">
+
                         <i className="menu-icon tf-icons ri-file-list-line"></i>
+
                         <div>Files</div>
+
                     </Link>
+
                 </li>
 
             </ul>
 
         </aside>
+
     );
+
 }
