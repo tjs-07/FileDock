@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 
 const Category = require("./models/Category");
+const Folder = require("./models/Folder");
 
 const app = express();
 
@@ -88,10 +89,89 @@ app.delete("/category/:id", async (req, res) => {
     }
 
 });
+
+
+// ADD FOLDER
+app.post("/folder", async (req, res) => {
+
+    try {
+
+        const folder = new Folder({
+
+            name: req.body.name,
+            categoryId: req.body.categoryId
+
+        });
+
+        await folder.save();
+
+        res.json({
+            success: true,
+            message: "Folder Added",
+            data: folder
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+});
+
+
+// GET FOLDERS
+app.get("/folder", async (req, res) => {
+
+    try {
+
+        const folders = await Folder.find()
+            .populate("categoryId");
+
+        res.json(folders);
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+});
+
+
+// DELETE FOLDER
+app.delete("/folder/:id", async (req, res) => {
+
+    try {
+
+        await Folder.findByIdAndDelete(req.params.id);
+
+        res.json({
+            success: true,
+            message: "Folder Deleted"
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+});
+
 app.use(cors());
 
 app.use(cors({
-    origin: "https://investor-portal-lyart.vercel.app"
+    origin: "https://investor-portal-lyart.vercel.app/"
 }));
 
 app.listen(process.env.PORT || 5000, () => {
