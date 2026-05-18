@@ -10,25 +10,39 @@ export default function Login() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const res = await fetch("/api/auth/login", {
-            method: "POST",
+        const res = await fetch(
+            "/api/auth/login",
+            {
+                method: "POST",
 
-            credentials: "include",
+                credentials: "include",
 
-            headers: {
-                "Content-Type": "application/json"
-            },
+                headers: {
+                    "Content-Type":
+                        "application/json",
+                },
 
-            body: JSON.stringify({
-                email,
-                password
-            })
-        });
+                body: JSON.stringify({
+                    email,
+                    password,
+                }),
+            }
+        );
 
-        const data = await res.json();
+        console.log(data);
+
         if (data.success) {
-            window.location.href = "/dashboard";
+
+            localStorage.setItem(
+                "loggedIn",
+                "true"
+            );
+
+            window.location.href =
+                "/dashboard";
+
         } else {
+
             alert(data.message);
         }
     }

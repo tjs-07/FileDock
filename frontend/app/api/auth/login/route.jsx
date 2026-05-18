@@ -82,6 +82,8 @@ cookieStore.set(
         "Login successful",
         redirect: "/dashboard",
     });
+      console.log("LOGIN SUCCESS")
+
 
   }catch (error) {
 
