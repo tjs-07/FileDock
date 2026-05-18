@@ -5,6 +5,8 @@ import axios from "axios";
 
 import AddCategoryModal from "../../../component/AddCategoryModal";
 
+import "./category.css";
+
 export default function Category() {
 
     const [showModel, setShowModel] = useState(false);
@@ -53,7 +55,7 @@ export default function Category() {
         getCategories();
     }, []);
 
-    // Different colors for cards
+    // Colors
     const colors = [
         "primary",
         "success",
@@ -63,9 +65,9 @@ export default function Category() {
         "secondary",
     ];
 
-    // Different icons
+    // Icons
     const icons = [
-        "ri-gallery-view-2",
+        "ri-gallery-view-2-line",
         "ri-image-line",
         "ri-folder-image-line",
         "ri-camera-lens-line",
@@ -77,17 +79,25 @@ export default function Category() {
 
         <div className="container-fluid px-0">
 
-            <div className="card p-4">
+            <div className="category-wrapper">
 
                 {/* Header */}
-                <div className="d-flex justify-content-between align-items-center mb-4">
+                <div className="category-header">
 
-                    <h3 className="mb-0 fw-bold">
-                        All Categories
-                    </h3>
+                    <div>
+
+                        <h2 className="category-title">
+                            All Categories
+                        </h2>
+
+                        <p className="category-subtitle">
+                            Manage your categories here
+                        </p>
+
+                    </div>
 
                     <button
-                        className="btn btn-primary"
+                        className="btn btn-primary add-category-btn"
                         onClick={() => setShowModel(true)}
                     >
                         + Add Category
@@ -105,7 +115,7 @@ export default function Category() {
 
                 )}
 
-                {/* Category Cards */}
+                {/* Cards */}
                 <div className="row">
 
                     {Array.isArray(categories) &&
@@ -121,62 +131,52 @@ export default function Category() {
                                     key={item._id}
                                 >
 
-                                    <div
-                                        className="card shadow-sm border-0 h-100"
-                                        style={{
-                                            borderRadius: "16px",
-                                        }}
-                                    >
+                                    <div className="category-card">
 
-                                        <div className="card-body">
+                                        {/* Actions */}
+                                        <div className="category-actions">
 
-                                            <div className="d-flex justify-content-between align-items-start">
+                                            {/* Edit */}
+                                            <button className="btn btn-light border">
+                                                <i className="ri-edit-line"></i>
+                                            </button>
 
-                                                {/* Left Side */}
-                                                <div className="d-flex align-items-center">
+                                            {/* Delete */}
+                                            <button
+                                                className="btn btn-danger"
+                                                onClick={() => {
 
-                                                    <div className="avatar me-3">
+                                                    if (window.confirm("Delete this category?")) {
+                                                        deleteCategory(item._id)
+                                                    }
 
-                                                        <div
-                                                            className={`avatar-initial bg-${color} bg-opacity-10 text-${color} rounded-3 d-flex align-items-center justify-content-center`}
-                                                            style={{
-                                                                width: "60px",
-                                                                height: "60px",
-                                                                fontSize: "28px",
-                                                            }}
-                                                        >
-                                                            <i className={icon}></i>
-                                                        </div>
+                                                }}
+                                            >
+                                                <i className="ri-delete-bin-line"></i>
+                                            </button>
 
-                                                    </div>
+                                        </div>
 
-                                                    <div>
+                                        {/* Content */}
+                                        <div className="d-flex align-items-center">
 
-                                                        <h5 className="mb-1 fw-semibold">
-                                                            {item.name}
-                                                        </h5>
+                                            {/* Icon */}
+                                            <div
+                                                className={`category-icon bg-${color} bg-opacity-10 text-${color}`}
+                                            >
+                                                <i className={icon}></i>
+                                            </div>
 
-                                                        <small className="text-muted">
-                                                            Category #{index + 1}
-                                                        </small>
+                                            {/* Text */}
+                                            <div>
 
-                                                    </div>
+                                                <h5 className="category-name">
+                                                    {item.name}
+                                                </h5>
 
-                                                </div>
-
-                                                {/* Delete Button */}
-                                                <button
-                                                    className="btn btn-sm btn-outline-danger"
-                                                    onClick={() => {
-
-                                                        if (window.confirm("Delete this category?")) {
-                                                            deleteCategory(item._id)
-                                                        }
-
-                                                    }}
-                                                >
-                                                    <i className="ri-delete-bin-line"></i>
-                                                </button>
+                                                <small className="text-muted">
+                                                    Category #{index + 1}
+                                                </small>
 
                                             </div>
 
