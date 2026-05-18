@@ -18,7 +18,7 @@ export default function Login() {
 
         const data = await res.json();
         if (data.success) {
-            router.push("/dashboard");
+            window.location.href = "/dashboard";
         } else {
             alert(data.message);
         }

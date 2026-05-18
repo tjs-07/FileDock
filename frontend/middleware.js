@@ -13,12 +13,20 @@ export function middleware(req) {
       "token"
     )?.value;
 
-  // Protect dashboard
-  if (
-    req.nextUrl.pathname.startsWith(
-      "/dashboard"
-    )
-  ) {
+  const protectedRoutes = [
+    "/dashboard",
+    "/category",
+    "/files",
+    "/folders",
+  ];
+
+  const isProtected =
+    protectedRoutes.some((route) =>
+      req.nextUrl.pathname.startsWith(route)
+    );
+
+  // Protect routes
+  if (isProtected) {
 
     if (!token) {
 
@@ -47,3 +55,12 @@ export function middleware(req) {
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: [
+    "/dashboard/:path*",
+    "/category/:path*",
+    "/files/:path*",
+    "/folders/:path*",
+  ],
+};
