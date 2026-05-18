@@ -1,26 +1,9 @@
-import "./globals.css";
 import Script from "next/script";
 
-import Navbar from "../component/Navbar";
-import Sidebar from "../component/Sidebar";
-import MobileMenuOverlay from "../component/MobileMenuOverlay";
-
-export const metadata = {
-  title: "Investor Portal Admin",
-  description: "Admin Panel",
-};
-
-export default function RootLayout({ children }) {
+export default function AuthLayout({ children }) {
   return (
-    <html
-      lang="en"
-      className="light-style layout-navbar-fixed layout-menu-fixed layout-compact"
-      dir="ltr"
-      data-theme="theme-default"
-      data-assets-path="/assets/"
-      data-template="vertical-menu-template"
-    >
-      <head>
+    <html lang="en">
+        <head>
 
         {/* CSS */}
         <link rel="stylesheet" href="/assets/vendor/css/core.css" />
@@ -38,37 +21,8 @@ export default function RootLayout({ children }) {
         />
 
       </head>
-
       <body>
-
-        <div className="layout-wrapper layout-content-navbar">
-          <div className="layout-container">
-
-            {/* Sidebar */}
-            <Sidebar />
-
-            {/* Main Content */}
-            <div className="layout-page">
-
-              {/* Navbar */}
-              <Navbar />
-
-              {/* Dynamic Page Content */}
-              <div className="content-wrapper">
-                <div className="container-xxl flex-grow-1 container-p-y">
-
-                  {children}
-
-                </div>
-              </div>
-
-            </div>
-          </div>
-
-          <MobileMenuOverlay />
-        </div>
-
-        {/* JS */}
+        {children}
         <Script
           src="/assets/vendor/js/helpers.js"
           strategy="beforeInteractive"
@@ -103,7 +57,6 @@ export default function RootLayout({ children }) {
           src="/assets/vendor/js/menu.js"
           strategy="beforeInteractive"
         />
-
       </body>
     </html>
   );
