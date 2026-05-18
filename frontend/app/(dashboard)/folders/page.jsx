@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-import AddFolderModal from "../../component/AddFolderModal";
+import AddFolderModal from "../../../component/AddFolderModal";
 
 export default function Folders() {
 
