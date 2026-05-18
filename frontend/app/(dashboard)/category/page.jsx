@@ -70,28 +70,28 @@ export default function Category() {
         <div className="container-fluid px-0 category-page">
 
             {/* Header */}
-            <div className=" card category-header d-flex justify-content-between mb-2">
+            <div className="card d-flex flex-row align-items-center justify-content-between p-4 mb-4">
 
-                <div>
+    <div>
 
-                    <h2 className="category-title">
-                        All Categories
-                    </h2>
+        <h2 className="mb-1">
+            All Categories
+        </h2>
 
-                    <p className="category-subtitle">
-                        Manage your categories here
-                    </p>
+        <p className="text-muted mb-0">
+            Manage your categories here
+        </p>
 
-                </div>
+    </div>
 
-                <button
-                    className="btn btn-primary add-category-btn"
-                    onClick={() => setShowModel(true)}
-                >
-                    + Add Category
-                </button>
+    <button
+        className="btn btn-primary"
+        onClick={() => setShowModel(true)}
+    >
+        + Add Category
+    </button>
 
-            </div>
+</div>
 
             {/* Modal */}
             {showModel && (
@@ -106,7 +106,7 @@ export default function Category() {
             {/* Cards */}
             <div className="content-wrapper px-0">
 
-                <div className="container-xxl flex-grow-1 container-p-y">
+               
 
                     <div className="row gy-5">
 
@@ -201,7 +201,7 @@ export default function Category() {
 
                     </div>
 
-                </div>
+                
 
             </div>
 
