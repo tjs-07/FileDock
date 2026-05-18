@@ -70,7 +70,7 @@ export default function Category() {
         <div className="container-fluid px-0 category-page">
 
             {/* Header */}
-            <div className="category-header d-flex align-items-center justify-content-between mb-2">
+            <div className="card category-header d-flex align-items-center justify-content-between mb-2">
 
                 <div>
 
