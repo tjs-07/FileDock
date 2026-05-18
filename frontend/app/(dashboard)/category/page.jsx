@@ -162,28 +162,31 @@ export default function Category() {
                                                     </div>
 
                                                     {/* Delete Button */}
-                                                    <div className="category-actions">
+                                                   <div className="category-actions">
 
-                                                        <button
-                                                            className="btn btn-sm btn-light border"
-                                                        >
-                                                            <i className="ri-edit-line"></i>
-                                                        </button>
+                                            {/* Edit */}
+                                            <button
+                                                className="btn btn-light border"
+                                            >
+                                                <i className="ri-edit-line"></i>
+                                            </button>
 
-                                                        <button
-                                                            className="btn btn-sm btn-danger"
-                                                            onClick={() => {
+                                            {/* Delete */}
+                                            <button
+                                                className="btn btn-danger"
+                                                onClick={() => {
 
-                                                                if (window.confirm("Delete this category?")) {
-                                                                    deleteCategory(item._id)
-                                                                }
+                                                    if (window.confirm("Delete this category?")) {
+                                                        deleteCategory(item._id)
+                                                    }
 
-                                                            }}
-                                                        >
-                                                            <i className="ri-delete-bin-line"></i>
-                                                        </button>
+                                                }}
+                                            >
+                                                <i className="ri-delete-bin-line"></i>
+                                            </button>
 
-                                                    </div>
+                                        </div>
+
                                                 </div>
 
                                             </div>
