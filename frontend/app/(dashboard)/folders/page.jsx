@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import axios from "axios";
 
 import AddFolderModal from "../../../component/AddFolderModal";
@@ -18,7 +18,7 @@ export default function Folders() {
         try {
 
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/folder`
+                "/api/folder"
             );
 
             setFolders(response.data);
@@ -36,7 +36,7 @@ export default function Folders() {
         try {
 
             await axios.delete(
-                `${process.env.NEXT_PUBLIC_API_URL}/folder/${id}`
+                `/api/folder/${id}`
             );
 
             setFolders((prev) =>
@@ -104,9 +104,9 @@ export default function Folders() {
 
                             {folders.map((item, index) => (
 
-                                <>
+                                <Fragment key={item._id}>
 
-                                    <tr key={item._id}
+                                    <tr
                                         style={{ cursor: "pointer" }}
                                         onClick={() => {
                                             if (openFolder === item._id) {
@@ -143,7 +143,8 @@ export default function Folders() {
 
                                             <button
                                                 className="btn btn-sm btn-outline-danger"
-                                                onClick={() => {
+                                                onClick={(event) => {
+                                                    event.stopPropagation();
 
                                                     if (window.confirm("Delete this folder?")) {
 
@@ -217,7 +218,7 @@ export default function Folders() {
 
                                     )}
 
-                                </>
+                                </Fragment>
 
                             ))}
 

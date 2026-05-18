@@ -4,6 +4,7 @@ import { saveUploadedFile } from "@/lib/uploads";
 import Category from "@/models/Category";
 import File from "@/models/Files";
 import Folder from "@/models/Folder";
+import mongoose from "mongoose";
 
 export const runtime = "nodejs";
 
@@ -14,9 +15,26 @@ export async function POST(request) {
         await connectDB();
 
         const formData = await request.formData();
+        const name = formData.get("name")?.toString().trim();
+        const categoryId = formData.get("categoryId")?.toString();
+
+        if (!name) {
+            return json({
+                success: false,
+                message: "Folder name is required"
+            }, 400);
+        }
+
+        if (categoryId && !mongoose.Types.ObjectId.isValid(categoryId)) {
+            return json({
+                success: false,
+                message: "Please select a valid category"
+            }, 400);
+        }
+
         const folder = new Folder({
-            name: formData.get("name"),
-            categoryId: formData.get("categoryId")
+            name,
+            ...(categoryId ? { categoryId } : {})
         });
 
         await folder.save();
@@ -32,7 +50,7 @@ export async function POST(request) {
 
             const filesData = savedFiles.map((file) => ({
                 title: file.originalname,
-                fileUrl: `${request.nextUrl.origin}/uploads/${file.filename}`,
+                fileUrl: file.fileUrl,
                 folderId: folder._id
             }));
 

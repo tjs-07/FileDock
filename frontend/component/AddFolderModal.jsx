@@ -18,13 +18,15 @@ export default function AddFolderModal({
 
     const [pdfs, setPdfs] = useState([]);
 
+    const [error, setError] = useState("");
+
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
     const getCategories = async () => {
 
         try {
 
-            const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/category`
-            );
+            const response = await axios.get("/api/category");
 
            setCategories(response.data.data);
 
@@ -43,14 +45,24 @@ export default function AddFolderModal({
     const handleSubmit = async (e) => {
 
         e.preventDefault();
+        setError("");
+
+        if (!name.trim()) {
+            setError("Folder name is required");
+            return;
+        }
+
+        setIsSubmitting(true);
 
         try {
 
             const formData = new FormData();
 
-            formData.append("name", name);
+            formData.append("name", name.trim());
 
-            formData.append("categoryId", categoryId);
+            if (categoryId) {
+                formData.append("categoryId", categoryId);
+            }
 
             for (let i = 0; i < pdfs.length; i++) {
 
@@ -58,10 +70,7 @@ export default function AddFolderModal({
 
             }
 
-            await axios.post(
-                `${process.env.NEXT_PUBLIC_API_URL}/folder`,
-                formData
-            );
+            await axios.post("/api/folder", formData);
 
             refreshFolders();
 
@@ -70,6 +79,14 @@ export default function AddFolderModal({
         } catch (error) {
 
             console.log(error);
+            setError(
+                error.response?.data?.message ||
+                "Unable to add folder. Please try again."
+            );
+
+        } finally {
+
+            setIsSubmitting(false);
 
         }
 
@@ -103,6 +120,11 @@ export default function AddFolderModal({
                 <h5>Add Folder</h5>
 
                 <form onSubmit={handleSubmit}>
+                    {error && (
+                        <div className="alert alert-danger py-2">
+                            {error}
+                        </div>
+                    )}
 
                     <div className="mb-3">
 
@@ -199,8 +221,9 @@ export default function AddFolderModal({
                         <button
                             type="submit"
                             className="btn btn-primary"
+                            disabled={isSubmitting}
                         >
-                            Add
+                            {isSubmitting ? "Adding..." : "Add"}
                         </button>
 
                     </div>
