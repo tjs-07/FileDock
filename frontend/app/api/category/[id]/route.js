@@ -1,28 +1,17 @@
-import connectDB from "@/lib/db";
-import { errorResponse, json } from "@/lib/api-response";
-import Category from "@/models/Category";
-
-export const runtime = "nodejs";
-
-export async function DELETE(_request, { params }) {
+const deleteCategory = async (id) => {
 
     try {
 
-        await connectDB();
+        await axios.delete(
+            `${process.env.NEXT_PUBLIC_API_URL}/category/${id}`
+        );
 
-        const { id } = params;
-
-        await Category.findByIdAndDelete(id);
-
-        return json({
-            success: true,
-            message: "Category Deleted"
-        });
+        await getCategories();
 
     } catch (error) {
 
-        return errorResponse(error);
+        console.log(error);
 
     }
 
-}
+};
