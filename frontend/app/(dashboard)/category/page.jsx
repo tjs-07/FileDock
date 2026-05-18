@@ -1,182 +1,190 @@
-"use client";
+    "use client";
 
-import { useEffect, useState } from "react";
-import axios from "axios";
+    import { useEffect, useState } from "react";
+    import axios from "axios";
 
-import AddCategoryModal from "../../../component/AddCategoryModal";
+    import AddCategoryModal from "../../../component/AddCategoryModal";
 
-import "./category.css";
+    import "./category.css";
 
-export default function Category() {
+    export default function Category() {
 
-    const [showModel, setShowModel] = useState(false);
+        const [showModel, setShowModel] = useState(false);
 
-    const [categories, setCategories] = useState([]);
+        const [categories, setCategories] = useState([]);
 
-    const getCategories = async () => {
+        const getCategories = async () => {
 
-        try {
+            try {
 
-            const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/category`
-            );
+                const response = await axios.get(
+                    `${process.env.NEXT_PUBLIC_API_URL}/category`
+                );
 
-            setCategories(response.data.data);
+                setCategories(response.data.data);
 
-        } catch (error) {
+            } catch (error) {
 
-            console.log(error);
+                console.log(error);
 
-        }
+            }
 
-    };
+        };
 
-    const deleteCategory = async (id) => {
+        const deleteCategory = async (id) => {
 
-        try {
+            try {
 
-            await axios.delete(
-                `${process.env.NEXT_PUBLIC_API_URL}/category/${id}`
-            );
+                await axios.delete(
+                    `${process.env.NEXT_PUBLIC_API_URL}/category/${id}`
+                );
 
-            setCategories((prev) =>
-                prev.filter((item) => item._id !== id)
-            );
+                setCategories((prev) =>
+                    prev.filter((item) => item._id !== id)
+                );
 
-        } catch (error) {
+            } catch (error) {
 
-            console.log(error);
+                console.log(error);
 
-        }
+            }
 
-    };
+        };
 
-    useEffect(() => {
-        getCategories();
-    }, []);
+        useEffect(() => {
+            getCategories();
+        }, []);
 
-    // Colors
-    const colors = [
-        "primary",
-        "success",
-        "danger",
-        "warning",
-        "info",
-        "secondary",
-    ];
+        // Colors
+        const colors = [
+            "primary",
+            "success",
+            "danger",
+            "warning",
+            "info",
+            "secondary",
+        ];
 
-    return (
+        return (
 
-        <div className="container-fluid px-0 category-page">
+            <div className="container-fluid px-0">
 
-            {/* Header */}
-            <div className="category-header">
+                <div className="category-wrapper">
 
-                <div>
+                    {/* Header */}
+                    <div className="category-header">
 
-                    <h2 className="category-title">
-                        All Categories
-                    </h2>
+                        <div>
 
-                    <p className="category-subtitle">
-                        Manage your categories here
-                    </p>
+                            <h2 className="category-title">
+                                All Categories
+                            </h2>
 
-                </div>
+                            <p className="category-subtitle">
+                                Manage your categories here
+                            </p>
 
-                <button
-                    className="btn btn-primary add-category-btn"
-                    onClick={() => setShowModel(true)}
-                >
-                    + Add Category
-                </button>
+                        </div>
 
-            </div>
+                        <button
+                            className="btn btn-primary add-category-btn"
+                            onClick={() => setShowModel(true)}
+                        >
+                            + Add Category
+                        </button>
 
-            {/* Modal */}
-            {showModel && (
+                    </div>
 
-                <AddCategoryModal
-                    onClose={() => setShowModel(false)}
-                    refreshCategories={getCategories}
-                />
+                    {/* Modal */}
+                    {showModel && (
 
-            )}
+                        <AddCategoryModal
+                            onClose={() => setShowModel(false)}
+                            refreshCategories={getCategories}
+                        />
 
-            {/* Cards */}
-            <div className="row g-4">
+                    )}
 
-                {Array.isArray(categories) &&
-                    categories.map((item, index) => {
+                    {/* Cards */}
+                    <div class="container-xxl flex-grow-1 container-p-y">
+              <div class="row gy-6">
 
-                        const color = colors[index % colors.length];
+                        {Array.isArray(categories) &&
+                            categories.map((item, index) => {
 
-                        return (
+                                const color = colors[index % colors.length];
 
-                            <div
-                                className="col-lg-3 col-sm-6"
-                                key={item._id}
-                            >
+                                return (
 
-                                <div className="card category-card">
+                                    <div
+                                        className="col-lg-3 col-sm-6"
+                                        key={item._id}
+                                    >
 
-                                    <div className="card-body">
+                                        <div className="card ">
 
-                                        <div className="d-flex align-items-center justify-content-between">
+                                            <div className="card-body">
 
-                                            {/* Left */}
-                                            <div className="d-flex align-items-center">
+                                                <div className="d-flex align-items-center justify-content-between">
 
-                                                <div className="avatar me-3">
+                                                    {/* Left */}
+                                                    <div className="d-flex align-items-center">
 
-                                                    <div className={`avatar-initial bg-label-${color}`}>
+                                                        <div className="avatar me-3">
 
-                                                        <i className="ri-gallery-view-2-fill category-main-icon"></i>
+                                                            <div className={`avatar-initial bg-label-${color} rounded-3`}>
+
+                                                                <i className="ri-gallery-view-2-line"></i>
+
+                                                            </div>
+
+                                                        </div>
+
+                                                        <div className="card-info">
+
+                                                            <h6 className="mb-0 category-name">
+                                                                {item.name}
+                                                            </h6>
+
+                                                        </div>
 
                                                     </div>
 
-                                                </div>
+                                                    {/* Delete */}
+                                                    <button
+                                                        className="btn btn-sm btn-outline-danger delete-btn"
+                                                        onClick={() => {
 
-                                                <div className="card-info">
+                                                            if (window.confirm("Delete this category?")) {
+                                                                deleteCategory(item._id)
+                                                            }
 
-                                                    <h6 className="mb-0 category-name">
-                                                        {item.name}
-                                                    </h6>
+                                                        }}
+                                                    >
+                                                        <i className="ri-delete-bin-line"></i>
+                                                    </button>
 
                                                 </div>
 
                                             </div>
 
-                                            {/* Delete */}
-                                            <button
-                                                className="btn btn-sm btn-outline-danger delete-btn"
-                                                onClick={() => {
-
-                                                    if (window.confirm("Delete this category?")) {
-                                                        deleteCategory(item._id)
-                                                    }
-
-                                                }}
-                                            >
-                                                <i className="ri-delete-bin-line"></i>
-                                            </button>
-
                                         </div>
 
                                     </div>
+                                     
 
-                                </div>
+                                );
 
+                            })}
                             </div>
+                                      </div>
 
-                        );
+                    </div>
 
-                    })}
+                </div>
 
-            </div>
+         
 
-        </div>
+        );
 
-    );
-
-}
+    }
