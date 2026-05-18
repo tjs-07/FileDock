@@ -68,30 +68,30 @@ export async function POST(req) {
 
     // Store cookie
     const cookieStore =
-  await cookies();
+      await cookies();
 
-cookieStore.set(
-  "token",
-  token,
-  cookieOptions
-);
+    cookieStore.set(
+      "token",
+      token,
+      cookieOptions
+    );
+
+    console.log("LOGIN SUCCESS");
 
     return Response.json({
       success: true,
-      message:
-        "Login successful",
-        redirect: "/dashboard",
+      message: "Login successful",
+      redirect: "/dashboard",
     });
-      console.log("LOGIN SUCCESS")
 
 
-  }catch (error) {
+  } catch (error) {
 
-  console.log(error);
+    console.log(error);
 
-  return Response.json({
-    success: false,
-    message: error.message,
-  });
+    return Response.json({
+      success: false,
+      message: error.message,
+    });
   }
 }

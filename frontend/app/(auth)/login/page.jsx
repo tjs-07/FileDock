@@ -39,12 +39,8 @@ export default function Login() {
 
             if (data.success) {
 
-                setTimeout(() => {
-
-                    window.location.href =
-                        "/dashboard";
-
-                }, 500);
+                router.push("/dashboard");
+                router.refresh();
 
             } else {
 
