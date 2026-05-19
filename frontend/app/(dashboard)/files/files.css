@@ -1,0 +1,33 @@
+/* File Card */
+.file-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Hover */
+.file-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Actions */
+.file-actions {
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateY(-5px);
+
+    transition: all 0.25s ease;
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Show Actions */
+.file-card:hover .file-actions {
+    opacity: 1;
+    visibility: visible;
+
+    transform: translateY(0);
+}
