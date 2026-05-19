@@ -120,7 +120,6 @@ export default function Folders() {
                             className="col-sm-6 col-lg-3 mb-4"
                             key={item._id}
                         >
-
                             <div
                                 className={`card card-border-shadow-${color} h-100 folder-card`}
                                 style={{ cursor: "pointer" }}

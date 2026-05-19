@@ -1,12 +1,30 @@
 import mongoose from "mongoose";
 
-const fileSchema = new mongoose.Schema({
-    title: String,
-    fileUrl: String,
-    folderId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Folder"
-    }
-});
+const fileSchema = new mongoose.Schema(
+    {
+        title: {
+            type: String,
+            required: true
+        },
 
-export default mongoose.models.Files || mongoose.model("Files", fileSchema);
+        folderId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Folder",
+            required: true
+        },
+
+        fileName: String,
+
+        filePath: String,
+
+        fileType: String,
+
+        size: Number
+    },
+    {
+        timestamps: true
+    }
+);
+
+export default mongoose.models.File ||
+    mongoose.model("File", fileSchema);
