@@ -128,7 +128,7 @@ export default function Folders() {
                                 className={`card card-border-shadow-${color} h-100 folder-card`}
                                 style={{ cursor: "pointer" }}
                                 onClick={() => {
-                                    router.push(`/dashboard/folders/${item._id}`);
+                                    router.push(`/folders/${item._id}`);
                                 }}
                             >
 

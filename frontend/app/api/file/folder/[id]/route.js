@@ -6,17 +6,19 @@ import Folder from "@/models/Folder";
 
 import { json, errorResponse } from "@/lib/api-response";
 
-export async function GET(request, { params }) {
+export async function GET(request, context) {
 
     try {
 
         await connectDB();
 
+        const { id } = await context.params;
+
         const files = await File.find({
-            folderId: params.id
+            folderId: id
         });
 
-        const folder = await Folder.findById(params.id);
+        const folder = await Folder.findById(id);
 
         return json({
             success: true,

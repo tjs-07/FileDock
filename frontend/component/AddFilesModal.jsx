@@ -6,13 +6,14 @@ import axios from "axios";
 export default function AddFilesModal({
 
     onClose,
-    refreshFiles
+    refreshFiles,
+    folderId: initialFolderId
 
 }) {
 
     const [folders, setFolders] = useState([]);
 
-    const [folderId, setFolderId] = useState("");
+    const [folderId, setFolderId] = useState(initialFolderId || "");
 
     const [files, setFiles] = useState([]);
 
@@ -142,6 +143,7 @@ export default function AddFilesModal({
                     )}
 
                     {/* Folder */}
+                    {!initialFolderId && (
                     <div className="mb-3">
 
                         <label className="form-label">
@@ -176,6 +178,7 @@ export default function AddFilesModal({
                         </select>
 
                     </div>
+                    )}
 
                     {/* File Upload */}
                     <div className="mb-3">

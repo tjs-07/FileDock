@@ -1,14 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useParams } from "next/navigation";
 
 import axios from "axios";
 
 import AddFileModal from "../../../../component/AddFilesModal";
 
-export default function FolderFilesPage({ params }) {
+export default function FolderFilesPage() {
 
-    const { id } = params;
+    const { id } = useParams();
 
     const [files, setFiles] = useState([]);
 
@@ -21,7 +22,7 @@ export default function FolderFilesPage({ params }) {
         try {
 
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/files/folder/${id}`
+                `/api/file/folder/${id}`
             );
 
             setFiles(response.data.data);
@@ -40,7 +41,12 @@ export default function FolderFilesPage({ params }) {
 
         getFiles();
 
-    }, []);
+    }, [id]);
+
+    const getFilePath = (file) =>
+        file.publicId
+            ? `/${file.publicId.split("/").map(encodeURIComponent).join("/")}`
+            : `/api/file/${file._id}`;
 
     return (
 
@@ -114,7 +120,7 @@ export default function FolderFilesPage({ params }) {
                                 </div>
 
                                 <a
-                                    href={file.fileUrl}
+                                    href={getFilePath(file)}
                                     target="_blank"
                                     className="btn btn-primary btn-sm"
                                 >
