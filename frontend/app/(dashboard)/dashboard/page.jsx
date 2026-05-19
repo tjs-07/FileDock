@@ -43,6 +43,11 @@ export default function Dashboard() {
         getDashboardData();
     }, []);
 
+    const getFilePath = (file) =>
+        file.publicId
+            ? `/${file.publicId.split("/").map(encodeURIComponent).join("/")}`
+            : `/api/file/${file._id}`;
+
     return (
 
         <div className="container-fluid px-0">
@@ -274,7 +279,7 @@ export default function Dashboard() {
                                         <td>
 
                                             <a
-                                                href={`/api/file/${item._id}`}
+                                                href={getFilePath(item)}
                                                 target="_blank"
                                                 className="btn btn-sm btn-primary"
                                             >

@@ -54,6 +54,11 @@ export default function Files() {
         getFiles();
     }, []);
 
+    const getFilePath = (file) =>
+        file.publicId
+            ? `/${file.publicId.split("/").map(encodeURIComponent).join("/")}`
+            : `/api/file/${file._id}`;
+
     return (
 
         <div className="container-fluid px-0">
@@ -168,7 +173,7 @@ export default function Files() {
 
                                             {/* View */}
                                             <a
-                                                href={`/api/file/${item._id}`}
+                                                href={getFilePath(item)}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="btn btn-sm btn-icon btn-text-primary"

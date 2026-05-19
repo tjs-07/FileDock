@@ -4,39 +4,11 @@ import { errorResponse, json } from "@/lib/api-response";
 import File from "@/models/Files";
 
 import { cloudinary } from "@/lib/cloudinary";
+import { streamFileInline } from "@/lib/cloudinary-file-view";
 import mongoose from "mongoose";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-function contentDispositionFilename(filename) {
-    return filename.replace(/["\\]/g, "");
-}
-
-function getFileExtension(filename) {
-    const extension = filename.split(".").pop();
-
-    return extension && extension !== filename
-        ? extension.toLowerCase().replace(/[^a-z0-9]/g, "")
-        : undefined;
-}
-
-function getCloudinaryViewUrl(file) {
-    if ((file.resourceType || "raw") === "raw" && file.publicId) {
-        return cloudinary.utils.private_download_url(
-            file.publicId,
-            getFileExtension(file.title),
-            {
-                resource_type: "raw",
-                type: "upload",
-                attachment: false,
-                expires_at: Math.floor(Date.now() / 1000) + 300
-            }
-        );
-    }
-
-    return file.fileUrl;
-}
 
 export async function GET(_request, context) {
 
@@ -62,25 +34,16 @@ export async function GET(_request, context) {
             }, 404);
         }
 
-        const viewUrl = getCloudinaryViewUrl(file);
+        const response = await streamFileInline(file);
 
-        const cloudinaryResponse = await fetch(viewUrl);
-
-        if (!cloudinaryResponse.ok || !cloudinaryResponse.body) {
+        if (response.error) {
             return json({
                 success: false,
                 message: "Unable to load file"
-            }, cloudinaryResponse.status || 502);
+            }, response.status);
         }
 
-        return new Response(cloudinaryResponse.body, {
-            status: 200,
-            headers: {
-                "Content-Type": file.fileType || cloudinaryResponse.headers.get("content-type") || "application/octet-stream",
-                "Content-Disposition": `inline; filename="${contentDispositionFilename(file.title)}"`,
-                "Cache-Control": "private, no-store"
-            }
-        });
+        return response;
 
     } catch (error) {
 
