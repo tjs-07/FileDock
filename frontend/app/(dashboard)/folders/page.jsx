@@ -15,7 +15,6 @@ export default function Folders() {
 
     const [openFolder, setOpenFolder] = useState(null);
 
-    const [openFolder, setOpenFolder] = useState(null);
 
     const router = useRouter();
 

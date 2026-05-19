@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import axios from "axios";
 
-import AddFileModal from "../../../../component/AddFileModal";
+import AddFileModal from "../../../../component/AddFilesModal";
 
 export default function FolderFilesPage({ params }) {
 
