@@ -1,6 +1,6 @@
 import connectDB from "@/lib/db";
 import { errorResponse, json } from "@/lib/api-response";
-import File from "@/models/File";
+import File from "@/models/Files";
 
 import fs from "fs";
 import path from "path";
