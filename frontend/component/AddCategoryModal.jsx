@@ -14,7 +14,7 @@ export default function AddCategoryModal({ onClose, refreshCategories }) {
         try {
 
             await axios.post(
-   `${process.env.NEXT_PUBLIC_API_URL}/category`, {
+                "/api/category", {
                 name
             });
 

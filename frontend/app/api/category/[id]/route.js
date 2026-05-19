@@ -1,8 +1,10 @@
 import connectDB from "@/lib/db";
 import Category from "@/models/Category";
 import { NextResponse } from "next/server";
+import mongoose from "mongoose";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function DELETE(req, context) {
 
@@ -10,13 +12,29 @@ export async function DELETE(req, context) {
 
         await connectDB();
 
-        const id = context.params.id;
+        const { id } = await context.params;
 
-        console.log("DELETE ID:", id);
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid category id"
+                },
+                { status: 400 }
+            );
+        }
 
         const deletedCategory = await Category.findByIdAndDelete(id);
 
-        console.log("DELETED:", deletedCategory);
+        if (!deletedCategory) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Category not found"
+                },
+                { status: 404 }
+            );
+        }
 
         return NextResponse.json({
             success: true,
@@ -25,12 +43,13 @@ export async function DELETE(req, context) {
 
     } catch (error) {
 
-        console.log(error);
-
-        return NextResponse.json({
-            success: false,
-            message: error.message
-        });
+        return NextResponse.json(
+            {
+                success: false,
+                message: error.message
+            },
+            { status: 500 }
+        );
 
     }
 

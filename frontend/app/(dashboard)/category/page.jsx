@@ -18,7 +18,7 @@ export default function Category() {
         try {
 
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/category`,
+                "/api/category",
                 {
                     headers: {
                         "Cache-Control": "no-cache",
@@ -40,9 +40,11 @@ export default function Category() {
 
         try {
 
-            await axios.delete(
-                `${process.env.NEXT_PUBLIC_API_URL}/category/${id}`
-            );
+            const response = await axios.delete(`/api/category/${id}`);
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || "Category was not deleted");
+            }
 
             setCategories((prev) =>
                 prev.filter((item) => item._id !== id)
@@ -182,7 +184,7 @@ export default function Category() {
                                                         onClick={() => {
 
                                                             if (window.confirm("Delete this category?")) {
-                                                                deleteCategory(item._id)
+                                                                deleteCategory(item._id);
                                                             }
 
                                                         }}
