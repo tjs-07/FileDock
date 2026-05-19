@@ -217,7 +217,7 @@ export default function Folders() {
                                     </div>
 
                                     {/* Files */}
-                                    {openFolder === item._id && (
+                                    {/* {openFolder === item._id && (
 
                                         <div className="mt-4">
 
@@ -268,7 +268,7 @@ export default function Folders() {
 
                                         </div>
 
-                                    )}
+                                    )} */}
 
                                 </div>
 
