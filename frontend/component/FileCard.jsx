@@ -1,4 +1,4 @@
-import "../app/files/files.css";
+import "../app/(dashboard)/files/files.css";
 
 export default function FileCard({
     item,
