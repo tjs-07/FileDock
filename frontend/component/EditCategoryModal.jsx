@@ -22,10 +22,14 @@ export default function EditCategoryModal({
 
             setLoading(true);
 
-            await axios.put(
+            const response = await axios.put(
                 `/api/category/${category._id}`,
-                { name }
+                { name: name.trim() }
             );
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || "Category was not updated");
+            }
 
             refreshCategories();
 

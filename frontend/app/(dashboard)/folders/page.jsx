@@ -28,7 +28,7 @@ export default function Folders() {
         try {
 
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/folder`
+                "/api/folder"
             );
 
             setFolders(response.data);
@@ -45,9 +45,11 @@ export default function Folders() {
 
         try {
 
-            await axios.delete(
-                `${process.env.NEXT_PUBLIC_API_URL}/folder/${id}`
-            );
+            const response = await axios.delete(`/api/folder/${id}`);
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || "Folder was not deleted");
+            }
 
             setFolders((prev) =>
                 prev.filter((item) => item._id !== id)

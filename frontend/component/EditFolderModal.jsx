@@ -22,12 +22,16 @@ export default function EditFolderModal({
 
             setLoading(true);
 
-            await axios.put(
+            const response = await axios.put(
                 `/api/folder/${folder._id}`,
                 {
-                    name
+                    name: name.trim()
                 }
             );
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || "Folder was not updated");
+            }
 
             refreshFolders();
 
