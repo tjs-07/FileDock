@@ -3,7 +3,7 @@ import { errorResponse, json } from "@/lib/api-response";
 
 import File from "@/models/Files";
 
-import cloudinary from "@/lib/cloudinary";
+import { cloudinary } from "@/lib/cloudinary";
 
 export const runtime = "nodejs";
 
