@@ -13,6 +13,31 @@ function contentDispositionFilename(filename) {
     return filename.replace(/["\\]/g, "");
 }
 
+function getFileExtension(filename) {
+    const extension = filename.split(".").pop();
+
+    return extension && extension !== filename
+        ? extension.toLowerCase().replace(/[^a-z0-9]/g, "")
+        : undefined;
+}
+
+function getCloudinaryViewUrl(file) {
+    if ((file.resourceType || "raw") === "raw" && file.publicId) {
+        return cloudinary.utils.private_download_url(
+            file.publicId,
+            getFileExtension(file.title),
+            {
+                resource_type: "raw",
+                type: "upload",
+                attachment: false,
+                expires_at: Math.floor(Date.now() / 1000) + 300
+            }
+        );
+    }
+
+    return file.fileUrl;
+}
+
 export async function GET(_request, context) {
 
     try {
@@ -37,7 +62,9 @@ export async function GET(_request, context) {
             }, 404);
         }
 
-        const cloudinaryResponse = await fetch(file.fileUrl);
+        const viewUrl = getCloudinaryViewUrl(file);
+
+        const cloudinaryResponse = await fetch(viewUrl);
 
         if (!cloudinaryResponse.ok || !cloudinaryResponse.body) {
             return json({
@@ -51,7 +78,7 @@ export async function GET(_request, context) {
             headers: {
                 "Content-Type": file.fileType || cloudinaryResponse.headers.get("content-type") || "application/octet-stream",
                 "Content-Disposition": `inline; filename="${contentDispositionFilename(file.title)}"`,
-                "Cache-Control": "private, max-age=300"
+                "Cache-Control": "private, no-store"
             }
         });
 
