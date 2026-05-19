@@ -17,6 +17,11 @@ const fileSchema = new mongoose.Schema(
 
         publicId: String,
 
+        resourceType: {
+            type: String,
+            default: "raw"
+        },
+
         fileType: String,
 
         size: Number

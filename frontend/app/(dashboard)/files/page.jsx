@@ -15,7 +15,7 @@ export default function Files() {
         try {
 
             const response = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/file`
+                "/api/file"
             );
 
             setFiles(response.data);
@@ -32,9 +32,11 @@ export default function Files() {
 
         try {
 
-            await axios.delete(
-                `${process.env.NEXT_PUBLIC_API_URL}/file/${id}`
-            );
+            const response = await axios.delete(`/api/file/${id}`);
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || "File was not deleted");
+            }
 
             setFiles((prev) =>
                 prev.filter((item) => item._id !== id)
@@ -166,7 +168,7 @@ export default function Files() {
 
                                             {/* View */}
                                             <a
-                                                href={item.fileUrl}
+                                                href={`/api/file/${item._id}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="btn btn-sm btn-icon btn-text-primary"

@@ -8,6 +8,25 @@ import { cloudinary } from "@/lib/cloudinary";
 
 export const runtime = "nodejs";
 
+function sanitizePathPart(value) {
+    return value
+        .trim()
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[^a-zA-Z0-9-_]+/g, "-")
+        .replace(/^-+|-+$/g, "")
+        .toLowerCase() || "file";
+}
+
+function sanitizeFilename(value) {
+    const parts = value.trim().split(".");
+    const extension = parts.length > 1 ? parts.pop() : "";
+    const name = sanitizePathPart(parts.join(".") || value);
+
+    return extension
+        ? `${name}.${extension.toLowerCase().replace(/[^a-z0-9]/g, "")}`
+        : name;
+}
+
 
 // GET FILES
 export async function GET() {
@@ -51,13 +70,20 @@ export async function POST(request) {
 
         if (!folder) {
 
-            return errorResponse("Folder not found");
+            return json({
+                success: false,
+                message: "Folder not found"
+            }, 404);
 
         }
 
         const savedFiles = [];
 
         for (const file of uploadedFiles) {
+
+            if (!file || file.size === 0) {
+                continue;
+            }
 
             const bytes = await file.arrayBuffer();
 
@@ -68,12 +94,16 @@ export async function POST(request) {
             const dataURI =
                 `data:${file.type};base64,${base64}`;
 
+            const publicId =
+                `${sanitizePathPart(folder.name)}/${sanitizeFilename(file.name)}`;
+
             // Upload to Cloudinary
             const uploaded = await cloudinary.uploader.upload(
                 dataURI,
                 {
-                    folder: folder.name,
-                    resource_type: "raw"
+                    public_id: publicId,
+                    resource_type: "raw",
+                    overwrite: true
                 }
             );
 
@@ -87,6 +117,8 @@ export async function POST(request) {
                 fileUrl: uploaded.secure_url,
 
                 publicId: uploaded.public_id,
+
+                resourceType: uploaded.resource_type || "raw",
 
                 fileType: file.type,
 

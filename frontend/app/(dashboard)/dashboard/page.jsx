@@ -20,13 +20,13 @@ export default function Dashboard() {
         try {
 
             const statsResponse = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/dashboard-stats`
+                "/api/dashboard-stats"
             );
 
             setStats(statsResponse.data);
 
             const filesResponse = await axios.get(
-                `${process.env.NEXT_PUBLIC_API_URL}/recent-files`
+                "/api/recent-files"
             );
 
             setRecentFiles(filesResponse.data);
@@ -274,7 +274,7 @@ export default function Dashboard() {
                                         <td>
 
                                             <a
-                                                href={item.fileUrl}
+                                                href={`/api/file/${item._id}`}
                                                 target="_blank"
                                                 className="btn btn-sm btn-primary"
                                             >
