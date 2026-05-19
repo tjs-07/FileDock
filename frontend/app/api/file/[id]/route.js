@@ -34,12 +34,21 @@ export async function GET(_request, context) {
             }, 404);
         }
 
+        if (!file.publicId && file.fileUrl?.includes("onrender.com/uploads/")) {
+            return json({
+                success: false,
+                message: "This file was uploaded before Cloudinary setup and the old upload URL is no longer available. Please re-upload this file."
+            }, 410);
+        }
+
         const response = await streamFileInline(file);
 
         if (response.error) {
             return json({
                 success: false,
-                message: "Unable to load file"
+                message: file.publicId
+                    ? "Unable to load file from Cloudinary"
+                    : "Unable to load legacy file URL. Please re-upload this file."
             }, response.status);
         }
 

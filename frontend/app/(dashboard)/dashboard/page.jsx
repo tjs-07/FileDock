@@ -1,5 +1,6 @@
 "use client";
 
+import FileCard from "../../../component/FileCard";
 import { useEffect, useState } from "react";
 import axios from "axios";
 
@@ -12,6 +13,24 @@ export default function Dashboard() {
         totalFiles: 0
 
     });
+
+    const deleteFile = async (id) => {
+
+        try {
+
+            await axios.delete(`/api/file/${id}`);
+
+            setRecentFiles((prev) =>
+                prev.filter((item) => item._id !== id)
+            );
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
+    };
 
     const [recentFiles, setRecentFiles] = useState([]);
 
@@ -57,7 +76,7 @@ export default function Dashboard() {
             <div className="mb-4">
 
                 <h3 className="mb-1">
-                    Welcome Back 
+                    Welcome Back
                 </h3>
 
                 <p className="text-muted mb-0">
@@ -233,68 +252,19 @@ export default function Dashboard() {
 
                     </div>
 
-                    <div className="table-responsive">
+                    <div className="row">
 
-                        <table className="table table-striped">
+                        {recentFiles.map((item, index) => (
 
-                            <thead>
+                            <FileCard
+                                key={item._id}
+                                item={item}
+                                index={index}
+                                getFilePath={getFilePath}
+                                deleteFile={deleteFile}
+                            />
 
-                                <tr>
-
-                                    <th>File</th>
-                                    <th>Folder</th>
-                                    <th>Category</th>
-                                    <th>View</th>
-
-                                </tr>
-
-                            </thead>
-
-                            <tbody>
-
-                                {recentFiles.map((item) => (
-
-                                    <tr key={item._id}>
-
-                                        <td>
-
-                                            <div className="d-flex align-items-center gap-2">
-
-                                                <i className="ri-file-pdf-line text-danger"></i>
-
-                                                {item.title}
-
-                                            </div>
-
-                                        </td>
-
-                                        <td>
-                                            {item.folderId?.name}
-                                        </td>
-
-                                        <td>
-                                            {item.folderId?.categoryId?.name}
-                                        </td>
-
-                                        <td>
-
-                                            <a
-                                                href={getFilePath(item)}
-                                                target="_blank"
-                                                className="btn btn-sm btn-primary"
-                                            >
-                                                View
-                                            </a>
-
-                                        </td>
-
-                                    </tr>
-
-                                ))}
-
-                            </tbody>
-
-                        </table>
+                        ))}
 
                     </div>
 

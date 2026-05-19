@@ -77,6 +77,9 @@ export default function FolderFilesPage() {
             ? `/${file.publicId.split("/").map(encodeURIComponent).join("/")}`
             : `/api/file/${file._id}`;
 
+    const canViewFile = (file) =>
+        Boolean(file.publicId || (file.fileUrl && !file.fileUrl.includes("onrender.com/uploads/")));
+
     return (
 
         <div className="container-fluid px-0">
@@ -130,6 +133,7 @@ export default function FolderFilesPage() {
                         item={item}
                         index={index}
                         getFilePath={getFilePath}
+                        canViewFile={canViewFile}
                         deleteFile={deleteFile}
                     />
 

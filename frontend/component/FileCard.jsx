@@ -4,6 +4,7 @@ export default function FileCard({
     item,
     index,
     getFilePath,
+    canViewFile = () => true,
     deleteFile
 }) {
 
@@ -63,16 +64,27 @@ export default function FileCard({
                         <div className="file-actions">
 
                             {/* View */}
-                            <a
-                                href={getFilePath(item)}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="btn btn-sm btn-icon btn-text-primary"
-                            >
+                            {canViewFile(item) ? (
+                                <a
+                                    href={getFilePath(item)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="btn btn-sm btn-icon btn-text-primary"
+                                >
 
-                                <i className="ri-eye-line"></i>
+                                    <i className="ri-eye-line"></i>
 
-                            </a>
+                                </a>
+                            ) : (
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-icon btn-text-secondary"
+                                    disabled
+                                    title="File URL is missing. Please re-upload this file."
+                                >
+                                    <i className="ri-eye-off-line"></i>
+                                </button>
+                            )}
 
                             {/* Delete */}
                             <button
@@ -134,6 +146,14 @@ export default function FileCard({
                         </div>
 
                     </div>
+
+                    {!item.publicId && item.fileUrl?.includes("onrender.com/uploads/") && (
+
+                        <div className="alert alert-warning py-2 px-3 mt-3 mb-0 small">
+                            Re-upload required
+                        </div>
+
+                    )}
 
                 </div>
 
