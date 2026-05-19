@@ -1,3 +1,5 @@
+import "../app/files/files.css";
+
 export default function FileCard({
     item,
     index,
