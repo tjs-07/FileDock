@@ -252,6 +252,8 @@ export default function Dashboard() {
 
                     </div>
 
+                </div>
+
                     <div className="row">
 
                         {recentFiles.map((item, index) => (
@@ -268,7 +270,7 @@ export default function Dashboard() {
 
                     </div>
 
-                </div>
+                
 
             </div>
 
