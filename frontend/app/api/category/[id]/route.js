@@ -4,22 +4,28 @@ import { NextResponse } from "next/server";
 
 export const runtime = "nodejs";
 
-export async function DELETE(request, { params }) {
+export async function DELETE(req, context) {
 
     try {
 
         await connectDB();
 
-        const { id } = params;
+        const id = context.params.id;
 
-        await Category.findByIdAndDelete(id);
+        console.log("DELETE ID:", id);
+
+        const deletedCategory = await Category.findByIdAndDelete(id);
+
+        console.log("DELETED:", deletedCategory);
 
         return NextResponse.json({
             success: true,
-            message: "Category deleted"
+            deletedCategory
         });
 
     } catch (error) {
+
+        console.log(error);
 
         return NextResponse.json({
             success: false,

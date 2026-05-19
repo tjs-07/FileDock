@@ -4,6 +4,9 @@ import { NextResponse } from "next/server";
 import { errorResponse, json } from "@/lib/api-response";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export const runtime = "nodejs";
 
 export async function POST(request) {
 
@@ -40,10 +43,19 @@ export async function GET() {
         await connectDB();
 
         const categories = await Category.find().sort({ createdAt: -1 });
-        return NextResponse.json({
-            success: true,
-            data: categories
-        });
+
+        return NextResponse.json(
+            {
+                success: true,
+                data: categories
+            },
+            {
+                status: 200,
+                headers: {
+                    "Cache-Control": "no-store"
+                }
+            }
+        );
 
     } catch (error) {
 
