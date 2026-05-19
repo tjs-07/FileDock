@@ -81,9 +81,9 @@ export default function Category() {
 
                 <div>
 
-                    <h2 className="mb-1">
+                    <h4 className="mb-1">
                         All Categories
-                    </h2>
+                    </h4>
 
                     <p className="text-muted mb-0">
                         Manage your categories here
