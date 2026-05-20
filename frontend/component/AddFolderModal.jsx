@@ -1,239 +1,239 @@
-"use client";
+    "use client";
 
-import { useEffect, useState } from "react";
-import axios from "axios";
+    import { useEffect, useState } from "react";
+    import axios from "axios";
 
-export default function AddFolderModal({
+    export default function AddFolderModal({
 
-    onClose,
-    refreshFolders
+        onClose,
+        refreshFolders
 
-}) {
+    }) {
 
-    const [name, setName] = useState("");
+        const [name, setName] = useState("");
 
-    const [categoryId, setCategoryId] = useState("");
+        const [categoryId, setCategoryId] = useState("");
 
-    const [categories, setCategories] = useState([]);
+        const [categories, setCategories] = useState([]);
 
-    const [pdfs, setPdfs] = useState([]);
+        const [pdfs, setPdfs] = useState([]);
 
-    const [error, setError] = useState("");
+        const [error, setError] = useState("");
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
+        const [isSubmitting, setIsSubmitting] = useState(false);
 
-    const getCategories = async () => {
+        const getCategories = async () => {
 
-        try {
+            try {
 
-            const response = await axios.get("/api/category");
+                const response = await axios.get("/api/category");
 
-           setCategories(response.data.data);
+            setCategories(response.data.data);
 
-        } catch (error) {
+            } catch (error) {
 
-            console.log(error);
-
-        }
-
-    };
-
-    useEffect(() => {
-        getCategories();
-    }, []);
-
-    const handleSubmit = async (e) => {
-
-        e.preventDefault();
-        setError("");
-
-        if (!name.trim()) {
-            setError("Folder name is required");
-            return;
-        }
-
-        setIsSubmitting(true);
-
-        try {
-
-            const formData = new FormData();
-
-            formData.append("name", name.trim());
-
-            if (categoryId) {
-                formData.append("categoryId", categoryId);
-            }
-
-            for (let i = 0; i < pdfs.length; i++) {
-
-                formData.append("pdfs", pdfs[i]);
+                console.log(error);
 
             }
 
-            await axios.post("/api/folder", formData);
+        };
 
-            refreshFolders();
+        useEffect(() => {
+            getCategories();
+        }, []);
 
-            onClose();
+        const handleSubmit = async (e) => {
 
-        } catch (error) {
+            e.preventDefault();
+            setError("");
 
-            console.log(error);
-            setError(
-                error.response?.data?.message ||
-                "Unable to add folder. Please try again."
-            );
+            if (!name.trim()) {
+                setError("Folder name is required");
+                return;
+            }
 
-        } finally {
+            setIsSubmitting(true);
 
-            setIsSubmitting(false);
+            try {
 
-        }
+                const formData = new FormData();
 
-    };
+                formData.append("name", name.trim());
 
-    return (
+                if (categoryId) {
+                    formData.append("categoryId", categoryId);
+                }
 
-        <div
-            className="d-flex justify-content-center align-items-center"
-            style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100vh",
-                backgroundColor: "rgba(0,0,0,0.5)",
-                zIndex: 9999
-            }}
-        >
+                for (let i = 0; i < pdfs.length; i++) {
+
+                    formData.append("pdfs", pdfs[i]);
+
+                }
+
+                await axios.post("/api/folder", formData);
+
+                refreshFolders();
+
+                onClose();
+
+            } catch (error) {
+
+                console.log(error);
+                setError(
+                    error.response?.data?.message ||
+                    "Unable to add folder. Please try again."
+                );
+
+            } finally {
+
+                setIsSubmitting(false);
+
+            }
+
+        };
+
+        return (
 
             <div
+                className="d-flex justify-content-center align-items-center"
                 style={{
-                    backgroundColor: "#fff",
-                    padding: "20px",
-                    borderRadius: "8px",
+                    position: "fixed",
+                    top: 0,
+                    left: 0,
                     width: "100%",
-                    maxWidth: "500px"
+                    height: "100vh",
+                    backgroundColor: "rgba(0,0,0,0.5)",
+                    zIndex: 9999
                 }}
             >
 
-                <h5>Add Folder</h5>
+                <div
+                    style={{
+                        backgroundColor: "#fff",
+                        padding: "20px",
+                        borderRadius: "8px",
+                        width: "100%",
+                        maxWidth: "500px"
+                    }}
+                >
 
-                <form onSubmit={handleSubmit}>
-                    {error && (
-                        <div className="alert alert-danger py-2">
-                            {error}
+                    <h5>Add Folder</h5>
+
+                    <form onSubmit={handleSubmit}>
+                        {error && (
+                            <div className="alert alert-danger py-2">
+                                {error}
+                            </div>
+                        )}
+
+                        <div className="mb-3">
+
+                            <label className="form-label">
+                                Folder Name
+                            </label>
+
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Enter folder name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                            />
+
                         </div>
-                    )}
 
-                    <div className="mb-3">
+                        <div className="mb-3">
 
-                        <label className="form-label">
-                            Folder Name
-                        </label>
-
-                        <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Enter folder name"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                        />
-
-                    </div>
-
-                    <div className="mb-3">
-
-                        <label className="form-label">
-                            Select Category
-                        </label>
-
-                        <select
-                            className="form-select"
-                            value={categoryId}
-                            onChange={(e) => setCategoryId(e.target.value)}
-                        >
-
-                            <option value="">
+                            <label className="form-label">
                                 Select Category
-                            </option>
+                            </label>
 
-                            {categories.map((item) => (
+                            <select
+                                className="form-select"
+                                value={categoryId}
+                                onChange={(e) => setCategoryId(e.target.value)}
+                            >
 
-                                <option
-                                    key={item._id}
-                                    value={item._id}
-                                >
-                                    {item.name}
+                                <option value="">
+                                    Select Category
                                 </option>
 
-                            ))}
+                                {categories.map((item) => (
 
-                        </select>
-
-                    </div>
-                    {/* <div className="mb-3">
-
-                        <label className="form-label">
-                            Upload PDF
-                        </label>
-
-                        <input
-                            type="file"
-                            className="form-control"
-                            accept=".pdf"
-                            multiple
-                            onChange={(e) => setPdfs(e.target.files)}
-                        />
-                        {pdfs.length > 0 && (
-
-                            <div className="mt-2">
-
-                                {Array.from(pdfs).map((file, index) => (
-
-                                    <div
-                                        key={index}
-                                        className="border rounded p-2 mb-2"
+                                    <option
+                                        key={item._id}
+                                        value={item._id}
                                     >
-                                        <i className="ri-file-pdf-line text-danger me-2"></i>
-
-                                        {file.name}
-                                    </div>
+                                        {item.name}
+                                    </option>
 
                                 ))}
 
-                            </div>
+                            </select>
 
-                        )}
+                        </div>
+                        {/* <div className="mb-3">
 
-                    </div> */}
+                            <label className="form-label">
+                                Upload PDF
+                            </label>
 
-                    <div className="d-flex justify-content-end gap-2">
+                            <input
+                                type="file"
+                                className="form-control"
+                                accept=".pdf"
+                                multiple
+                                onChange={(e) => setPdfs(e.target.files)}
+                            />
+                            {pdfs.length > 0 && (
 
-                        <button
-                            type="button"
-                            className="btn btn-secondary"
-                            onClick={onClose}
-                        >
-                            Cancel
-                        </button>
+                                <div className="mt-2">
 
-                        <button
-                            type="submit"
-                            className="btn btn-primary"
-                            disabled={isSubmitting}
-                        >
-                            {isSubmitting ? "Adding..." : "Add"}
-                        </button>
+                                    {Array.from(pdfs).map((file, index) => (
 
-                    </div>
+                                        <div
+                                            key={index}
+                                            className="border rounded p-2 mb-2"
+                                        >
+                                            <i className="ri-file-pdf-line text-danger me-2"></i>
 
-                </form>
+                                            {file.name}
+                                        </div>
+
+                                    ))}
+
+                                </div>
+
+                            )}
+
+                        </div> */}
+
+                        <div className="d-flex justify-content-end gap-2">
+
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={onClose}
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                type="submit"
+                                className="btn btn-primary"
+                                disabled={isSubmitting}
+                            >
+                                {isSubmitting ? "Adding..." : "Add"}
+                            </button>
+
+                        </div>
+
+                    </form>
+
+                </div>
 
             </div>
 
-        </div>
+        );
 
-    );
-
-}
+    }
