@@ -1,10 +1,11 @@
 import connectDB from "@/lib/db";
 import { errorResponse, json } from "@/lib/api-response";
 
-import File from "@/models/Files";
 import Folder from "@/models/Folder";
 
 import { cloudinary } from "@/lib/cloudinary";
+import { getPublicFileUrl } from "@/lib/cloudinary-file-view";
+import { serializeFolderFiles, serializeFolderFile } from "@/lib/folder-files";
 
 export const runtime = "nodejs";
 
@@ -29,18 +30,16 @@ function sanitizeFilename(value) {
 
 
 // GET FILES
-export async function GET() {
+export async function GET(request) {
 
     try {
 
         await connectDB();
 
-        const files = await File.find().populate({
-            path: "folderId",
-            populate: {
-                path: "categoryId"
-            }
-        });
+        const folders = await Folder.find().populate("categoryId");
+        const files = folders.flatMap((folder) =>
+            serializeFolderFiles(folder, request)
+        );
 
         return json(files);
 
@@ -89,45 +88,60 @@ export async function POST(request) {
 
             const buffer = Buffer.from(bytes);
 
-            const base64 = buffer.toString("base64");
-
-            const dataURI =
-                `data:${file.type};base64,${base64}`;
-
             const publicId =
                 `${sanitizePathPart(folder.name)}/${sanitizeFilename(file.name)}`;
 
-            const uploaded = await cloudinary.uploader.upload(
-                dataURI,
-                {
-                    public_id: publicId,
-                    resource_type: "raw",
-                    overwrite: true
-                }
-            );
+            const uploaded = await new Promise((resolve, reject) => {
 
-            // Save DB
-            const newFile = await File.create({
+                const stream = cloudinary.uploader.upload_stream(
+                    {
+                        public_id: publicId,
+                        resource_type: "raw",
+
+                        overwrite: true
+                    },
+                    (error, result) => {
+
+                        if (error) {
+
+                            reject(error);
+
+                        } else {
+
+                            resolve(result);
+                        }
+                    }
+                );
+
+                stream.end(buffer);
+
+            });
+            const fileData = {
 
                 title: file.name,
 
-                folderId,
-
-                fileUrl: uploaded.secure_url,
+                fileUrl: getPublicFileUrl({
+                    publicId: uploaded.public_id
+                }, request),
 
                 publicId: uploaded.public_id,
 
-                resourceType: uploaded.resource_type || "raw",
+                resourceType: "raw",
 
                 fileType: file.type,
 
                 size: file.size
 
-            });
+            };
 
-            savedFiles.push(newFile);
+            folder.files.push(fileData);
+            const newFile = folder.files[folder.files.length - 1];
+
+            savedFiles.push(serializeFolderFile(newFile, folder, request));
 
         }
+
+        await folder.save();
 
         return json({
             success: true,

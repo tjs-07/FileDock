@@ -1,10 +1,9 @@
 import connectDB from "@/lib/db";
 
-import File from "@/models/Files";
-
 import Folder from "@/models/Folder";
 
 import { json, errorResponse } from "@/lib/api-response";
+import { serializeFolderFiles } from "@/lib/folder-files";
 
 export async function GET(request, context) {
 
@@ -14,20 +13,18 @@ export async function GET(request, context) {
 
         const { id } = await context.params;
 
-        const files = await File.find({
-            folderId: id
-        }).populate({
-            path: "folderId",
-            populate: {
-                path: "categoryId"
-            }
-        });
+        const folder = await Folder.findById(id).populate("categoryId");
 
-        const folder = await Folder.findById(id);
+        if (!folder) {
+            return json({
+                success: false,
+                message: "Folder not found"
+            }, 404);
+        }
 
         return json({
             success: true,
-            data: files,
+            data: serializeFolderFiles(folder, request),
             folder
         });
 

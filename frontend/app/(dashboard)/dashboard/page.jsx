@@ -63,9 +63,9 @@ export default function Dashboard() {
     }, []);
 
     const getFilePath = (file) =>
-        file.publicId
+        file.viewUrl || file.fileUrl || (file.publicId
             ? `/${file.publicId.split("/").map(encodeURIComponent).join("/")}`
-            : `/api/file/${file._id}`;
+            : `/api/file/${file._id}`);
 
     return (
 

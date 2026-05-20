@@ -1,8 +1,8 @@
 import connectDB from "@/lib/db";
 import { errorResponse, json } from "@/lib/api-response";
 import { saveUploadedFile } from "@/lib/uploads";
+import { serializeFolderFiles } from "@/lib/folder-files";
 import Category from "@/models/Category";
-import File from "@/models/Files";
 import Folder from "@/models/Folder";
 import mongoose from "mongoose";
 
@@ -48,13 +48,14 @@ export async function POST(request) {
                 pdfs.map((file) => saveUploadedFile(file))
             );
 
-            const filesData = savedFiles.map((file) => ({
+            folder.files = savedFiles.map((file) => ({
                 title: file.originalname,
                 fileUrl: file.fileUrl,
-                folderId: folder._id
+                fileType: file.fileType,
+                size: file.size
             }));
 
-            await File.insertMany(filesData);
+            await folder.save();
         }
 
         return json({
@@ -66,20 +67,16 @@ export async function POST(request) {
     }
 }
 
-export async function GET() {
+export async function GET(request) {
     try {
         await connectDB();
 
         const folders = await Folder.find().populate("categoryId");
         const finalData = await Promise.all(
             folders.map(async (folder) => {
-                const files = await File.find({
-                    folderId: folder._id
-                });
-
                 return {
                     ...folder._doc,
-                    files
+                    files: serializeFolderFiles(folder, request)
                 };
             })
         );

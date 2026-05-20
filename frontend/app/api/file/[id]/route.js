@@ -1,10 +1,11 @@
 import connectDB from "@/lib/db";
 import { errorResponse, json } from "@/lib/api-response";
 
-import File from "@/models/Files";
+import Folder from "@/models/Folder";
 
 import { cloudinary } from "@/lib/cloudinary";
 import { streamFileInline } from "@/lib/cloudinary-file-view";
+import { findFolderFile } from "@/lib/folder-files";
 import mongoose from "mongoose";
 
 export const runtime = "nodejs";
@@ -25,7 +26,10 @@ export async function GET(_request, context) {
             }, 400);
         }
 
-        const file = await File.findById(id);
+        const folder = await Folder.findOne({
+            "files._id": id
+        });
+        const file = folder ? findFolderFile(folder, id) : null;
 
         if (!file) {
             return json({
@@ -77,7 +81,10 @@ export async function DELETE(_request, context) {
             }, 400);
         }
 
-        const file = await File.findById(id);
+        const folder = await Folder.findOne({
+            "files._id": id
+        });
+        const file = folder ? findFolderFile(folder, id) : null;
 
         if (!file) {
 
@@ -105,8 +112,8 @@ export async function DELETE(_request, context) {
             }
         }
 
-        // Delete DB Entry
-        await File.findByIdAndDelete(id);
+        file.deleteOne();
+        await folder.save();
 
         return json({
             success: true,

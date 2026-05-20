@@ -35,6 +35,32 @@ export function getPublicFilePath(file) {
         : `/api/file/${file._id}`;
 }
 
+export function getPublicFileUrl(file, request) {
+    const path = getPublicFilePath(file);
+
+    if (request?.url) {
+        return new URL(path, request.url).toString();
+    }
+
+    return path;
+}
+
+export function serializeFileForClient(file, request) {
+    const data = typeof file.toObject === "function"
+        ? file.toObject()
+        : file;
+
+    const viewUrl = data.publicId
+        ? getPublicFileUrl(data, request)
+        : data.fileUrl;
+
+    return {
+        ...data,
+        fileUrl: viewUrl,
+        viewUrl
+    };
+}
+
 export async function streamFileInline(file) {
     const viewUrl = getCloudinaryViewUrl(file);
     const cloudinaryResponse = await fetch(viewUrl);

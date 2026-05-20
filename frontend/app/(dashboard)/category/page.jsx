@@ -151,8 +151,7 @@ export default function Category() {
                                             <div className="d-flex align-items-center justify-content-between">
 
                                                 {/* Left Side */}
-                                                <div className="d-flex align-items-center flex-wrap">
-
+                                               <div className="d-flex align-items-start">
                                                     <div className="avatar me-3">
 
                                                         <div className={`avatar-initial bg-label-${color} rounded-3`}>
@@ -167,11 +166,13 @@ export default function Category() {
 
                                                     <div className="card-info">
 
-                                                        <div className="d-flex align-items-center">
+                                                        <div className="d-flex align-items-center" >
 
-                                                            <h5 className="mb-0 category-name">
-                                                                {item.name}
-                                                            </h5>
+                                                            
+                                                            <h6 className="mb-0 category-name">
+    {item.name}
+</h6>
+                                                              
 
                                                         </div>
 

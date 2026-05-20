@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "migrate:files": "node --env-file=.env.local scripts/migrate-files-to-folders.mjs",
     "lint": "eslint"
   },
   "dependencies": {

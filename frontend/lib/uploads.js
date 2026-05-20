@@ -10,6 +10,8 @@ export async function saveUploadedFile(file) {
     return {
         filename,
         originalname: file.name,
-        fileUrl: `data:${contentType};base64,${buffer.toString("base64")}`
+        fileUrl: `data:${contentType};base64,${buffer.toString("base64")}`,
+        fileType: contentType,
+        size: file.size
     };
 }

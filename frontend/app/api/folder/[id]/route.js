@@ -1,6 +1,7 @@
 import connectDB from "@/lib/db";
 import { errorResponse, json } from "@/lib/api-response";
 import Folder from "@/models/Folder";
+import { cloudinary } from "@/lib/cloudinary";
 import mongoose from "mongoose";
 
 
@@ -19,14 +20,29 @@ export async function DELETE(_request, context) {
             }, 400);
         }
 
-        const deletedFolder = await Folder.findByIdAndDelete(id);
+        const folder = await Folder.findById(id);
 
-        if (!deletedFolder) {
+        if (!folder) {
             return json({
                 success: false,
                 message: "Folder not found"
             }, 404);
         }
+
+        await Promise.all(
+            (folder.files || [])
+                .filter((file) => file.publicId)
+                .map((file) =>
+                    cloudinary.uploader.destroy(
+                        file.publicId,
+                        {
+                            resource_type: file.resourceType || "raw"
+                        }
+                    )
+                )
+        );
+
+        await Folder.findByIdAndDelete(id);
 
         return json({
             success: true,
