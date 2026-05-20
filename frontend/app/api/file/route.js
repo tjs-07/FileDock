@@ -97,7 +97,6 @@ export async function POST(request) {
             const publicId =
                 `${sanitizePathPart(folder.name)}/${sanitizeFilename(file.name)}`;
 
-            // Upload to Cloudinary
             const uploaded = await cloudinary.uploader.upload(
                 dataURI,
                 {
