@@ -155,7 +155,7 @@ export default function Login() {
                                     </div>
                                 </div>
 
-                                <div className="mb-5">
+                                {/* <div className="mb-5">
                                     <div className="form-check mt-2">
                                         <input className="form-check-input" type="checkbox" id="terms-conditions" name="terms" />
                                         <label className="form-check-label" htmlFor="terms-conditions">
@@ -163,7 +163,7 @@ export default function Login() {
                                             <a href="javascript:void(0);">privacy policy & terms</a>
                                         </label>
                                     </div>
-                                </div>
+                                </div> */}
                                 <button type="submit" className="btn btn-primary d-grid w-100">Sign In</button>
                             </form>
 

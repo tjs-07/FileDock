@@ -6,9 +6,10 @@ import {
 } from "@/lib/api-response";
 
 import fs from "fs";
-import path from "path";
 
 import { v4 as uuidv4 } from "uuid";
+
+import { getFolderUploadTarget } from "@/lib/folder-upload-path";
 
 export const runtime = "nodejs";
 
@@ -174,25 +175,6 @@ export async function POST(request) {
         const folderId =
             folderResult.insertId;
 
-        // Upload path
-        const uploadDir =
-            path.join(
-
-                process.cwd(),
-
-                "public",
-
-                "uploads"
-            );
-
-        // Create uploads folder
-        if (!fs.existsSync(uploadDir)) {
-
-            fs.mkdirSync(uploadDir, {
-                recursive: true
-            });
-        }
-
         // Handle PDFs
         const pdfs =
             formData
@@ -216,20 +198,25 @@ export async function POST(request) {
             const uniqueName =
                 `${uuidv4()}-${sanitizeFilename(file.name)}`;
 
-            const filePath =
-                path.join(
-                    uploadDir,
+            const uploadTarget =
+                await getFolderUploadTarget(
+                    db,
+                    folderId,
                     uniqueName
                 );
 
+            if (!fs.existsSync(uploadTarget.directoryPath)) {
+
+                fs.mkdirSync(uploadTarget.directoryPath, {
+                    recursive: true
+                });
+            }
+
             // Save physical file
             fs.writeFileSync(
-                filePath,
+                uploadTarget.filePath,
                 buffer
             );
-
-            const fileUrl =
-                `/uploads/${uniqueName}`;
 
             // Save DB record
             await db.query(
@@ -244,7 +231,7 @@ export async function POST(request) {
 
                 [
                     file.name,
-                    fileUrl,
+                    uploadTarget.fileUrl,
                     folderId
                 ]
             );

@@ -1,59 +1,130 @@
-import connectDB from "@/lib/db";
-
-import User from "@/models/User";
+import db from "@/lib/db";
 
 import {
   createToken,
   cookieOptions,
 } from "@/lib/auth";
 
+import bcrypt from "bcryptjs";
+
 import { NextResponse } from "next/server";
+
+export const runtime = "nodejs";
+
+
+async function ensureUsersTable() {
+
+  await db.query(
+
+    `CREATE TABLE IF NOT EXISTS users (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      email VARCHAR(255) NOT NULL UNIQUE,
+      password VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )`
+  );
+
+}
+
+
+function authResponse(message, status = 401) {
+
+  return NextResponse.json(
+    {
+      success: false,
+      message,
+    },
+    {
+      status,
+    }
+  );
+
+}
+
 
 export async function POST(req) {
 
   try {
 
-    await connectDB();
+    await ensureUsersTable();
 
     const {
       email,
       password,
     } = await req.json();
 
-    const user =
-      await User.findOne({
-        email,
-      });
+    const normalizedEmail =
+      email?.toString().trim().toLowerCase();
+
+    if (!normalizedEmail || !password) {
+
+      return authResponse(
+        "Email and password are required",
+        400
+      );
+
+    }
+
+    const [users] = await db.query(
+
+      `SELECT *
+       FROM users
+       WHERE email = ?
+       LIMIT 1`,
+
+      [normalizedEmail]
+    );
+
+    let user = users[0];
 
     if (!user) {
 
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Invalid email",
-        },
-        {
-          status: 401,
-        }
-      );
-    }
-
-    const isMatch =
-      await user.comparePassword(
-        password
+      const [countRows] = await db.query(
+        `SELECT COUNT(*) AS totalUsers
+         FROM users`
       );
 
-    if (!isMatch) {
+      if (countRows[0].totalUsers > 0) {
 
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Invalid password",
-        },
-        {
-          status: 401,
-        }
+        return authResponse("Invalid email");
+
+      }
+
+      const hashedPassword =
+        await bcrypt.hash(password, 10);
+
+      const [result] = await db.query(
+
+        `INSERT INTO users (email, password)
+         VALUES (?, ?)`,
+
+        [
+          normalizedEmail,
+          hashedPassword,
+        ]
       );
+
+      user = {
+        id: result.insertId,
+        email: normalizedEmail,
+        password: hashedPassword,
+      };
+
+    } else {
+
+      const isMatch =
+        await bcrypt.compare(
+          password,
+          user.password
+        );
+
+      if (!isMatch) {
+
+        return authResponse("Invalid password");
+
+      }
+
     }
 
     const token =
@@ -62,8 +133,7 @@ export async function POST(req) {
     const response =
       NextResponse.json({
         success: true,
-        message:
-          "Login successful",
+        message: "Login successful",
       });
 
     response.cookies.set(
@@ -78,9 +148,16 @@ export async function POST(req) {
 
     console.log(error);
 
-    return NextResponse.json({
-      success: false,
-      message: error.message,
-    });
+    return NextResponse.json(
+      {
+        success: false,
+        message: error.message,
+      },
+      {
+        status: 500,
+      }
+    );
+
   }
+
 }

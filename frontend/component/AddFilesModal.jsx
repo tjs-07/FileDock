@@ -84,7 +84,7 @@ export default function AddFilesModal({
                 formData
             );
 
-            refreshFiles();
+            refreshFiles?.();
 
             onClose();
 

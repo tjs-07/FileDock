@@ -4,9 +4,21 @@ import FileCard from "../../../component/FileCard";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Category from "../category/page";
-import CategoryCard from "@/component/CategoryCard";
+import CategoryCard from "../../../component/CategoryCard";
+import AddCategoryModal from "../../../component/AddCategoryModal";
+import EditCategoryModal from "../../../component/EditCategoryModal";
+import AddFileModal from "../../../component/AddFilesModal";
+import AddFolderModal from "../../../component/AddFolderModal";
+
+
 
 export default function Dashboard() {
+
+    const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
+
+    const [showAddFileModal, setShowAddFileModal] = useState(false);    
+    
+    const [showAddFolderModal, setShowAddFolderModal] = useState(false);
 
     const [stats, setStats] = useState({
 
@@ -113,7 +125,8 @@ export default function Dashboard() {
 
             {/* HEADING */}
 
-            <div className="mb-4">
+            <div className="d-flex justify-content-between align-items-center mb-4">
+                <div className="mb-4">
 
                 <h3 className="mb-1">
                     Welcome Back
@@ -124,6 +137,38 @@ export default function Dashboard() {
                 </p>
 
             </div>
+            <div className="d-flex gap-2">
+                            <button className="btn btn-primary" onClick={() => setShowAddCategoryModal(true)}>
+                                Add Category
+                            </button>
+                            <button className="btn dotted-btn" onClick={() => setShowAddFolderModal(true)}>
+                                Add Folder
+                            </button>
+                            <button className="btn file-btn" onClick={() => setShowAddFileModal(true)}>
+                                Add File
+                            </button>
+                        </div>
+                         {showAddCategoryModal && (
+                        
+                                        <AddCategoryModal
+                                            onClose={() => setShowAddCategoryModal(false)}
+                                            refreshCategories={getCategories}
+                                        />
+                        
+                                    )}
+                                    {showAddFileModal && (
+                                        <AddFileModal
+                                            onClose={() => setShowAddFileModal(false)}
+                                            refreshFiles={getDashboardData}
+                                            />
+                                    )}
+                                    {showAddFolderModal && (
+                                        <AddFolderModal 
+                                        onClose ={()=>setShowAddFolderModal(false)}
+                                        refreshFolders={getDashboardData}
+                                        />
+                                    )}  
+                </div>
 
             {/* STATISTICS */}
 
@@ -289,7 +334,11 @@ export default function Dashboard() {
                         <h4 className="mb-0">
                             Recent Uploaded Categories
                         </h4>
-
+                        {/* <div className="d-flex gap-2">
+                            <button className="btn btn-primary">Add Category</button>
+                        <button className="btn dotted-btn">Add Folder</button>
+                        <button className="btn file-btn">Add File</button>
+                        </div> */}
                     </div>
 
                 </div>

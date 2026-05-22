@@ -23,7 +23,6 @@ export default function FolderCard({
 
         if (selectedCategoryId) params.set("categoryId", selectedCategoryId.toString());
         if (selectedCategoryName) params.set("categoryName", selectedCategoryName.toString());
-        params.set("folderName", item.name);
 
         router.push(`/folders/${folderId}?${params.toString()}`);
     };

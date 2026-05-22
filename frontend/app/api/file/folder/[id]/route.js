@@ -10,6 +10,46 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 
+async function getBreadcrumbs(folder) {
+
+    const breadcrumbs = [];
+    let currentFolder = folder;
+
+    while (currentFolder) {
+
+        breadcrumbs.unshift({
+            id: currentFolder.id,
+            name: currentFolder.name,
+            category_id: currentFolder.category_id,
+            category_name: currentFolder.category_name
+        });
+
+        if (!currentFolder.parent_folder_id) {
+            break;
+        }
+
+        const [parentRows] = await db.query(
+
+            `SELECT
+                folders.*,
+                categories.name AS category_name
+             FROM folders
+             LEFT JOIN categories
+             ON folders.category_id = categories.id
+             WHERE folders.id = ?`,
+
+            [currentFolder.parent_folder_id]
+        );
+
+        currentFolder = parentRows[0];
+
+    }
+
+    return breadcrumbs;
+
+}
+
+
 
 
 
@@ -44,6 +84,9 @@ export async function GET(request, context) {
             }, 404);
         }
 
+        const breadcrumbs =
+            await getBreadcrumbs(folder);
+
         // Get subfolders
         const [subFolders] = await db.query(
 
@@ -73,6 +116,8 @@ export async function GET(request, context) {
             data: {
 
                 folder,
+
+                breadcrumbs,
 
                 subFolders,
 

@@ -29,6 +29,8 @@ function FolderFilesContent() {
 
     const [folder, setFolder] = useState(null);
 
+    const [breadcrumbs, setBreadcrumbs] = useState([]);
+
     const [showModal, setShowModal] = useState(false);
 
     const [showFolderModal, setShowFolderModal] = useState(false);
@@ -49,6 +51,8 @@ function FolderFilesContent() {
             setSubFolders(response.data.data?.subFolders || []);
 
             setFolder(response.data.data?.folder || null);
+
+            setBreadcrumbs(response.data.data?.breadcrumbs || []);
 
         } catch (error) {
 
@@ -120,7 +124,23 @@ function FolderFilesContent() {
 
     const breadcrumbCategoryId = categoryId || folder?.category_id || folder?.categoryId?.id || folder?.categoryId?._id;
     const breadcrumbCategoryName = categoryName || folder?.category_name || folder?.categoryId?.name;
-    const breadcrumbFolderName = folderName || folder?.name;
+    const breadcrumbFolderName = folder?.name || folderName;
+
+    const openFolder = (folderItem) => {
+
+        const params = new URLSearchParams();
+
+        if (breadcrumbCategoryId) {
+            params.set("categoryId", breadcrumbCategoryId.toString());
+        }
+
+        if (breadcrumbCategoryName) {
+            params.set("categoryName", breadcrumbCategoryName);
+        }
+
+        router.push(`/folders/${folderItem.id}?${params.toString()}`);
+
+    };
 
     return (
 
@@ -153,13 +173,53 @@ function FolderFilesContent() {
                         </>
                     )}
 
-                    {breadcrumbCategoryName && breadcrumbFolderName && (
-                        <i className="ri-arrow-right-s-line text-muted"></i>
-                    )}
+                    {breadcrumbs.map((item, index) => {
 
-                    <span className="fw-semibold">
-                        {breadcrumbFolderName}
-                    </span>
+                        const isLast =
+                            index === breadcrumbs.length - 1;
+
+                        return (
+
+                            <div
+                                key={item.id}
+                                className="d-flex align-items-center gap-2"
+                            >
+
+                                {(breadcrumbCategoryName || index > 0) && (
+                                    <i className="ri-arrow-right-s-line text-muted"></i>
+                                )}
+
+                                <span
+                                    className={isLast ? "fw-semibold" : "text-primary cursor-pointer"}
+                                    style={{ cursor: isLast ? "default" : "pointer" }}
+                                    onClick={() => {
+
+                                        if (!isLast) {
+                                            openFolder(item);
+                                        }
+
+                                    }}
+                                >
+                                    {item.name}
+                                </span>
+
+                            </div>
+
+                        );
+
+                    })}
+
+                    {breadcrumbs.length === 0 && breadcrumbFolderName && (
+                        <>
+                            {breadcrumbCategoryName && (
+                                <i className="ri-arrow-right-s-line text-muted"></i>
+                            )}
+
+                            <span className="fw-semibold">
+                                {breadcrumbFolderName}
+                            </span>
+                        </>
+                    )}
 
                 </div>
             )}

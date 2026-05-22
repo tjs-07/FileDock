@@ -5,7 +5,7 @@ export const createToken =
 
     return jwt.sign(
       {
-        id: user._id,
+        id: user.id ?? user._id,
         email: user.email,
       },
 
