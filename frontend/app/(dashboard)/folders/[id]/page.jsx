@@ -1,23 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import axios from "axios";
 
 import AddFileModal from "../../../../component/AddFilesModal";
 
 import FileCard from "../../../../component/FileCard";
+import "../../../../component/FileCard.css";
+import AddFolderModal from "../../../../component/AddFolderModal";
+import FolderCard from "../../../../component/FolderCard";
 
-export default function FolderFilesPage() {
+
+
+function FolderFilesContent() {
 
     const { id } = useParams();
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const categoryId = searchParams.get("categoryId");
+    const categoryName = searchParams.get("categoryName");
+    const folderName = searchParams.get("folderName");
 
     const [files, setFiles] = useState([]);
+
+    const [subFolders, setSubFolders] = useState([]);
 
     const [folder, setFolder] = useState(null);
 
     const [showModal, setShowModal] = useState(false);
+
+    const [showFolderModal, setShowFolderModal] = useState(false);
 
     const getFiles = async () => {
 
@@ -30,9 +44,33 @@ export default function FolderFilesPage() {
                 `/api/file/folder/${id}`
             );
 
-            setFiles(response.data.data);
+            setFiles(response.data.data?.files || []);
 
-            setFolder(response.data.folder);
+            setSubFolders(response.data.data?.subFolders || []);
+
+            setFolder(response.data.data?.folder || null);
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
+    };
+
+    const deleteFolder = async (folderId) => {
+
+        try {
+
+            const response = await axios.delete(`/api/folder/${folderId}`);
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || "Folder was not deleted");
+            }
+
+            setSubFolders((prev) =>
+                prev.filter((item) => (item.id ?? item._id) !== folderId)
+            );
 
         } catch (error) {
 
@@ -53,7 +91,7 @@ export default function FolderFilesPage() {
             }
 
             setFiles((prev) =>
-                prev.filter((item) => item._id !== fileId)
+                prev.filter((item) => (item.id ?? item._id) !== fileId)
             );
 
         } catch (error) {
@@ -73,19 +111,61 @@ export default function FolderFilesPage() {
     }, [id]);
 
     const getFilePath = (file) =>
-        file.viewUrl || file.fileUrl || (file.publicId
+        file.viewUrl || file.file_url || file.fileUrl || (file.publicId
             ? `/${file.publicId.split("/").map(encodeURIComponent).join("/")}`
-            : `/api/file/${file._id}`);
+            : `/api/file/${file.id ?? file._id}`);
 
     const canViewFile = (file) =>
-        Boolean(file.publicId || (file.fileUrl && !file.fileUrl.includes("onrender.com/uploads/")));
+        Boolean(file.file_url || file.publicId || (file.fileUrl && !file.fileUrl.includes("onrender.com/uploads/")));
+
+    const breadcrumbCategoryId = categoryId || folder?.category_id || folder?.categoryId?.id || folder?.categoryId?._id;
+    const breadcrumbCategoryName = categoryName || folder?.category_name || folder?.categoryId?.name;
+    const breadcrumbFolderName = folderName || folder?.name;
 
     return (
 
         <div className="container-fluid px-0">
 
+            {(breadcrumbCategoryName || breadcrumbFolderName) && (
+                <div className="d-flex align-items-center gap-2 px-4 pt-4 mb-2">
+
+                    {breadcrumbCategoryName && (
+                        <>
+                            <span
+                                className="text-primary cursor-pointer"
+                                style={{ cursor: "pointer" }}
+                                onClick={() => {
+
+                                    const params = new URLSearchParams();
+
+                                    if (breadcrumbCategoryId) {
+                                        params.set("categoryId", breadcrumbCategoryId.toString());
+                                    }
+
+                                    params.set("categoryName", breadcrumbCategoryName);
+
+                                    router.push(`/folders?${params.toString()}`);
+
+                                }}
+                            >
+                                {breadcrumbCategoryName}
+                            </span>
+                        </>
+                    )}
+
+                    {breadcrumbCategoryName && breadcrumbFolderName && (
+                        <i className="ri-arrow-right-s-line text-muted"></i>
+                    )}
+
+                    <span className="fw-semibold">
+                        {breadcrumbFolderName}
+                    </span>
+
+                </div>
+            )}
+
             {/* Header */}
-            <div className="card p-4 mb-4">
+            <div className=" p-4 mb-4">
 
                 <div className="d-flex justify-content-between align-items-center">
 
@@ -101,18 +181,37 @@ export default function FolderFilesPage() {
 
                     </div>
 
-                    <button
-                        className="btn btn-primary"
-                        onClick={() => setShowModal(true)}
-                    >
-                        + Add File
-                    </button>
+                    <div className="d-flex gap-2">
+                        <button
+                            className="btn dotted-btn"
+                            onClick={() => setShowFolderModal(true)}
+                        >
+                            + Add Folder
+                        </button>
+                        <button
+                            className="btn file-btn"
+                            onClick={() => setShowModal(true)}
+                        >
+                            + Add File
+                        </button>
+
+
+                    </div>
 
                 </div>
 
             </div>
 
             {/* Upload Modal */}
+            {showFolderModal && (
+                <AddFolderModal
+                    onClose={() => setShowFolderModal(false)}
+                    refreshFolders={getFiles}
+                    initialCategoryId={breadcrumbCategoryId?.toString() || ""}
+                    initialCategoryName={breadcrumbCategoryName || ""}
+                    initialParentFolderId={id?.toString() || ""}
+                />
+            )}
             {showModal && (
 
                 <AddFileModal
@@ -123,13 +222,44 @@ export default function FolderFilesPage() {
 
             )}
 
-            {/* Files */}
-            <div className="row">
+            {/* Folders and Files */}
+            <div className="folder-grid px-4">
+
+                {subFolders.map((item, index) => {
+
+                    const colors = [
+                        "primary",
+                        "success",
+                        "danger",
+                        "warning",
+                        "info",
+                        "secondary",
+                    ];
+
+                    return (
+
+                        <FolderCard
+                            key={item.id ?? item._id}
+                            item={item}
+                            color={colors[index % colors.length]}
+                            categoryId={breadcrumbCategoryId}
+                            categoryName={breadcrumbCategoryName}
+                            onEdit={() => {}}
+                            onDelete={(folder) => {
+                                if (window.confirm("Delete this folder?")) {
+                                    deleteFolder(folder.id ?? folder._id);
+                                }
+                            }}
+                        />
+
+                    );
+
+                })}
 
                 {files.map((item, index) => (
 
                     <FileCard
-                        key={item._id}
+                        key={item.id ?? item._id}
                         item={item}
                         index={index}
                         getFilePath={getFilePath}
@@ -143,6 +273,16 @@ export default function FolderFilesPage() {
 
         </div>
 
+    );
+
+}
+
+export default function FolderFilesPage() {
+
+    return (
+        <Suspense fallback={null}>
+            <FolderFilesContent />
+        </Suspense>
     );
 
 }

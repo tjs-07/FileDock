@@ -5,11 +5,14 @@ import axios from "axios";
 import "./files.css";
 import AddFilesModal from "../../../component/AddFilesModal";
 import FileCard from "../../../component/FileCard";
+import "../../../component/FileCard.css";
 
 export default function Files() {
 
     const [files, setFiles] = useState([]);
-    const [showModal, setShowModal] = useState(false);
+    const [showFolderModal, setShowFolderModal] = useState(false);
+
+const [showFileModal, setShowFileModal] = useState(false);
 
     const getFiles = async () => {
 
@@ -19,7 +22,7 @@ export default function Files() {
                 "/api/file"
             );
 
-            setFiles(response.data);
+            setFiles(response.data.data || []);
 
         } catch (error) {
 
@@ -40,7 +43,7 @@ export default function Files() {
             }
 
             setFiles((prev) =>
-                prev.filter((item) => item._id !== id)
+                prev.filter((item) => (item.id ?? item._id) !== id)
             );
 
         } catch (error) {
@@ -56,19 +59,19 @@ export default function Files() {
     }, []);
 
     const getFilePath = (file) =>
-        file.viewUrl || file.fileUrl || (file.publicId
+        file.viewUrl || file.file_url || file.fileUrl || (file.publicId
             ? `/${file.publicId.split("/").map(encodeURIComponent).join("/")}`
-            : `/api/file/${file._id}`);
+            : `/api/file/${file.id ?? file._id}`);
 
     const canViewFile = (file) =>
-        Boolean(file.publicId || (file.fileUrl && !file.fileUrl.includes("onrender.com/uploads/")));
+        Boolean(file.file_url || file.publicId || (file.fileUrl && !file.fileUrl.includes("onrender.com/uploads/")));
 
     return (
 
         <div className="container-fluid px-0">
 
             {/* Header */}
-            <div className="card p-4 mb-4">
+            <div className=" p-4 mb-4">
 
                 <div className="d-flex justify-content-between align-items-center">
 
@@ -85,35 +88,45 @@ export default function Files() {
 
 
                     </div>
-                    <button
+                    {/* <button
                         className="btn btn-primary"
-                        onClick={() => setShowModal(true)}
+                        onClick={() => setShowFolderModal(true)}
                     >
+                        + Add Folder
+                    </button> */}
 
-                        + Add Files
-
+                    <button
+                        className="btn file-btn"
+                        onClick={() => setShowFileModal(true)}
+                    >
+                        + Add File
                     </button>
 
                 </div>
 
             </div>
             {/* Modal */}
-            {showModal && (
+            {/* {showFolderModal && (
+                <AddFolderModal
+                    onClose={() => setShowFolderModal(false)}
+                    refreshFolders={getFolders}
+                />
+            )} */}
 
+            {showFileModal && (
                 <AddFilesModal
-                    onClose={() => setShowModal(false)}
+                    onClose={() => setShowFileModal(false)}
                     refreshFiles={getFiles}
                 />
-
             )}
 
             {/* File Cards */}
-            <div className="row">
+            <div className="file-grid">
 
                 {files.map((item, index) => (
 
                     <FileCard
-                        key={item._id}
+                        key={item.id ?? item._id}
                         item={item}
                         index={index}
                         getFilePath={getFilePath}

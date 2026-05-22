@@ -1,29 +1,20 @@
-import mongoose from "mongoose";
+import mysql from "mysql2/promise";
 
-const MONGO_URI = process.env.MONGO_URI;
+const pool = mysql.createPool({
 
-let cached = global.mongoose;
+    host: "localhost",
 
-if (!cached) {
-    cached = global.mongoose = {
-        conn: null,
-        promise: null
-    };
-}
+    user: "root",
 
-export default async function connectDB() {
-    if (!MONGO_URI) {
-        throw new Error("Please define the MONGO_URI environment variable");
-    }
+    password: "root123",
 
-    if (cached.conn) {
-        return cached.conn;
-    }
+    database: "investor_portal",
 
-    if (!cached.promise) {
-        cached.promise = mongoose.connect(MONGO_URI).then((mongooseInstance) => mongooseInstance);
-    }
+    waitForConnections: true,
 
-    cached.conn = await cached.promise;
-    return cached.conn;
-}
+    connectionLimit: 10,
+
+    queueLimit: 0
+});
+
+export default pool;

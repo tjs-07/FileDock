@@ -13,6 +13,7 @@ export default function EditFolderModal({
     const [name, setName] = useState(folder?.name || "");
 
     const [loading, setLoading] = useState(false);
+    const folderId = folder?.id ?? folder?._id;
 
     const updateFolder = async (e) => {
 
@@ -23,7 +24,7 @@ export default function EditFolderModal({
             setLoading(true);
 
             const response = await axios.put(
-                `/api/folder/${folder._id}`,
+                `/api/folder/${folderId}`,
                 {
                     name: name.trim()
                 }

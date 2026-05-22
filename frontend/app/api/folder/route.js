@@ -1,88 +1,281 @@
-import connectDB from "@/lib/db";
-import { errorResponse, json } from "@/lib/api-response";
-import { saveUploadedFile } from "@/lib/uploads";
-import { serializeFolderFiles } from "@/lib/folder-files";
-import Category from "@/models/Category";
-import Folder from "@/models/Folder";
-import mongoose from "mongoose";
+import db from "@/lib/db";
+
+import {
+    errorResponse,
+    json
+} from "@/lib/api-response";
+
+import fs from "fs";
+import path from "path";
+
+import { v4 as uuidv4 } from "uuid";
 
 export const runtime = "nodejs";
 
-void Category;
 
-export async function POST(request) {
+
+
+
+
+
+function sanitizeFilename(name) {
+
+    return name.replace(
+        /[^a-zA-Z0-9.]/g,
+        "_"
+    );
+
+}
+
+
+
+
+
+
+
+
+// GET FOLDERS
+export async function GET() {
+
     try {
-        await connectDB();
 
-        const formData = await request.formData();
-        const name = formData.get("name")?.toString().trim();
-        const categoryId = formData.get("categoryId")?.toString();
+        // Get folders + category
+        const [folders] = await db.query(
 
-        if (!name) {
-            return json({
-                success: false,
-                message: "Folder name is required"
-            }, 400);
-        }
+            `SELECT
+                folders.*,
+                categories.name AS category_name
+             FROM folders
+             LEFT JOIN categories
+             ON folders.category_id = categories.id
+             WHERE folders.parent_folder_id IS NULL
+             ORDER BY folders.created_at DESC`
+        );
 
-        if (categoryId && !mongoose.Types.ObjectId.isValid(categoryId)) {
-            return json({
-                success: false,
-                message: "Please select a valid category"
-            }, 400);
-        }
+        // Add files to each folder
+        const finalData =
+            await Promise.all(
 
-        const folder = new Folder({
-            name,
-            ...(categoryId ? { categoryId } : {})
-        });
+                folders.map(async (folder) => {
 
-        await folder.save();
+                    const [files] =
+                        await db.query(
 
-        const pdfs = formData
-            .getAll("pdfs")
-            .filter((file) => file && file.size > 0);
+                            `SELECT *
+                             FROM files
+                             WHERE folder_id = ?`,
 
-        if (pdfs.length > 0) {
-            const savedFiles = await Promise.all(
-                pdfs.map((file) => saveUploadedFile(file))
+                            [folder.id]
+                        );
+
+                    return {
+                        ...folder,
+                        files
+                    };
+
+                })
             );
-
-            folder.files = savedFiles.map((file) => ({
-                title: file.originalname,
-                fileUrl: file.fileUrl,
-                fileType: file.fileType,
-                size: file.size
-            }));
-
-            await folder.save();
-        }
 
         return json({
             success: true,
-            message: "Folder Added"
+            data: finalData
         });
+
     } catch (error) {
+
         return errorResponse(error);
+
     }
+
 }
 
-export async function GET(request) {
+
+
+
+
+
+
+
+
+
+
+
+// CREATE FOLDER
+export async function POST(request) {
+
     try {
-        await connectDB();
 
-        const folders = await Folder.find().populate("categoryId");
-        const finalData = await Promise.all(
-            folders.map(async (folder) => {
-                return {
-                    ...folder._doc,
-                    files: serializeFolderFiles(folder, request)
-                };
-            })
-        );
+        const formData =
+            await request.formData();
 
-        return json(finalData);
+        const name =
+            formData.get("name")
+                ?.toString()
+                .trim();
+
+        const rawCategoryId =
+            formData.get("categoryId")
+                ?.toString()
+                .trim();
+
+        const categoryId =
+            rawCategoryId && /^\d+$/.test(rawCategoryId)
+                ? Number(rawCategoryId)
+                : null;
+
+        const rawParentFolderId =
+            formData.get("parentFolderId")
+                ?.toString()
+                .trim();
+
+        const parentFolderId =
+            rawParentFolderId && /^\d+$/.test(rawParentFolderId)
+                ? Number(rawParentFolderId)
+                : null;
+
+        // Validation
+        if (!name) {
+
+            return json({
+                success: false,
+                message:
+                    "Folder name is required"
+            }, 400);
+        }
+
+        if (!categoryId) {
+
+            return json({
+                success: false,
+                message:
+                    "Category is required"
+            }, 400);
+        }
+
+        // Create folder
+        const [folderResult] =
+            await db.query(
+
+                `INSERT INTO folders
+                (
+                    name,
+                    category_id,
+                    parent_folder_id
+                )
+                VALUES (?, ?, ?)`,
+
+                [
+                    name,
+                    categoryId,
+                    parentFolderId
+                ]
+            );
+
+        const folderId =
+            folderResult.insertId;
+
+        // Upload path
+        const uploadDir =
+            path.join(
+
+                process.cwd(),
+
+                "public",
+
+                "uploads"
+            );
+
+        // Create uploads folder
+        if (!fs.existsSync(uploadDir)) {
+
+            fs.mkdirSync(uploadDir, {
+                recursive: true
+            });
+        }
+
+        // Handle PDFs
+        const pdfs =
+            formData
+                .getAll("pdfs")
+                .filter(
+                    (file) =>
+                        file &&
+                        file.size > 0
+                );
+
+        // Save files
+        for (const file of pdfs) {
+
+            const bytes =
+                await file.arrayBuffer();
+
+            const buffer =
+                Buffer.from(bytes);
+
+            // Unique filename
+            const uniqueName =
+                `${uuidv4()}-${sanitizeFilename(file.name)}`;
+
+            const filePath =
+                path.join(
+                    uploadDir,
+                    uniqueName
+                );
+
+            // Save physical file
+            fs.writeFileSync(
+                filePath,
+                buffer
+            );
+
+            const fileUrl =
+                `/uploads/${uniqueName}`;
+
+            // Save DB record
+            await db.query(
+
+                `INSERT INTO files
+                (
+                    name,
+                    file_url,
+                    folder_id
+                )
+                VALUES (?, ?, ?)`,
+
+                [
+                    file.name,
+                    fileUrl,
+                    folderId
+                ]
+            );
+
+        }
+
+        // Fetch created folder
+        const [rows] =
+            await db.query(
+
+                `SELECT *
+                 FROM folders
+                 WHERE id = ?`,
+
+                [folderId]
+            );
+
+        return json({
+
+            success: true,
+
+            message: "Folder Added",
+
+            data: rows[0]
+
+        });
+
     } catch (error) {
+
         return errorResponse(error);
+
     }
+
 }

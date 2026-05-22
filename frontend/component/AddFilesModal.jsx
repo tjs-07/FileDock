@@ -27,7 +27,7 @@ export default function AddFilesModal({
 
             const response = await axios.get("/api/folder");
 
-            setFolders(response.data);
+            setFolders(response.data.data || []);
 
         } catch (error) {
 
@@ -38,8 +38,10 @@ export default function AddFilesModal({
     };
 
     useEffect(() => {
-        getFolders();
-    }, []);
+        if (!initialFolderId) {
+            getFolders();
+        }
+    }, [initialFolderId]);
 
     const handleSubmit = async (e) => {
 
@@ -165,8 +167,8 @@ export default function AddFilesModal({
                             {folders.map((folder) => (
 
                                 <option
-                                    key={folder._id}
-                                    value={folder._id}
+                                    key={folder.id ?? folder._id}
+                                    value={folder.id ?? folder._id}
                                 >
 
                                     {folder.name}

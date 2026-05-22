@@ -6,13 +6,16 @@
     export default function AddFolderModal({
 
         onClose,
-        refreshFolders
+        refreshFolders,
+        initialCategoryId = "",
+        initialCategoryName = "",
+        initialParentFolderId = ""
 
     }) {
 
         const [name, setName] = useState("");
 
-        const [categoryId, setCategoryId] = useState("");
+        const [categoryId, setCategoryId] = useState(initialCategoryId || "");
 
         const [categories, setCategories] = useState([]);
 
@@ -42,6 +45,10 @@
             getCategories();
         }, []);
 
+        useEffect(() => {
+            setCategoryId(initialCategoryId || "");
+        }, [initialCategoryId]);
+
         const handleSubmit = async (e) => {
 
             e.preventDefault();
@@ -64,6 +71,10 @@
                     formData.append("categoryId", categoryId);
                 }
 
+                if (initialParentFolderId) {
+                    formData.append("parentFolderId", initialParentFolderId);
+                }
+
                 for (let i = 0; i < pdfs.length; i++) {
 
                     formData.append("pdfs", pdfs[i]);
@@ -72,7 +83,7 @@
 
                 await axios.post("/api/folder", formData);
 
-                refreshFolders();
+                refreshFolders?.();
 
                 onClose();
 
@@ -142,6 +153,7 @@
 
                         </div>
 
+                        {!initialCategoryId && (
                         <div className="mb-3">
 
                             <label className="form-label">
@@ -152,17 +164,24 @@
                                 className="form-select"
                                 value={categoryId}
                                 onChange={(e) => setCategoryId(e.target.value)}
+                                disabled={Boolean(initialCategoryId)}
                             >
 
                                 <option value="">
                                     Select Category
                                 </option>
 
+                                {initialCategoryId && initialCategoryName && (
+                                    <option value={initialCategoryId}>
+                                        {initialCategoryName}
+                                    </option>
+                                )}
+
                                 {categories.map((item) => (
 
                                     <option
-                                        key={item._id}
-                                        value={item._id}
+                                        key={item.id}
+                                        value={item.id}
                                     >
                                         {item.name}
                                     </option>
@@ -172,6 +191,7 @@
                             </select>
 
                         </div>
+                        )}
                         {/* <div className="mb-3">
 
                             <label className="form-label">

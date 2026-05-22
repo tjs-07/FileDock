@@ -1,29 +1,58 @@
-import connectDB from "@/lib/db";
-import Category from "@/models/Category";
+import db from "@/lib/db";
+
+import {
+    errorResponse,
+    json
+} from "@/lib/api-response";
+
 import { NextResponse } from "next/server";
-import { errorResponse, json } from "@/lib/api-response";
 
 export const runtime = "nodejs";
+
 export const dynamic = "force-dynamic";
+
+
 
 export async function POST(request) {
 
     try {
 
-        await connectDB();
-
         const body = await request.json();
 
-        const category = new Category({
-            name: body.name
-        });
+        const name = body.name?.trim();
 
-        await category.save();
+        // Validation
+        if (!name) {
+
+            return json({
+                success: false,
+                message: "Category name is required"
+            }, 400);
+        }
+
+        // Insert category
+        const [result] = await db.query(
+
+            `INSERT INTO categories (name)
+             VALUES (?)`,
+
+            [name]
+        );
+
+        // Fetch inserted category
+        const [rows] = await db.query(
+
+            `SELECT *
+             FROM categories
+             WHERE id = ?`,
+
+            [result.insertId]
+        );
 
         return json({
             success: true,
             message: "Category Added",
-            data: category
+            data: rows[0]
         });
 
     } catch (error) {
@@ -34,13 +63,19 @@ export async function POST(request) {
 
 }
 
+
+
+
 export async function GET() {
 
     try {
 
-        await connectDB();
+        const [categories] = await db.query(
 
-        const categories = await Category.find().sort({ createdAt: -1 });
+            `SELECT *
+             FROM categories
+             ORDER BY created_at DESC`
+        );
 
         return NextResponse.json(
             {

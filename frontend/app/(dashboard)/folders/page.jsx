@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import axios from "axios";
 
 import AddFolderModal from "../../../component/AddFolderModal";
 import EditFolderModal from "../../../component/EditFolderModal";
+import FolderCard from "../../../component/FolderCard";
 
 import "./folder.css";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-export default function Folders() {
+function FoldersContent() {
 
     const [showModal, setShowModal] = useState(false);
 
@@ -22,16 +23,21 @@ export default function Folders() {
     const [selectedFolder, setSelectedFolder] = useState(null);
 
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const categoryId = searchParams.get("categoryId");
+    const categoryName = searchParams.get("categoryName");
 
     const getFolders = async () => {
 
         try {
 
             const response = await axios.get(
-                "/api/folder"
+                categoryId
+                    ? `/api/folder/category/${categoryId}`
+                    : "/api/folder"
             );
 
-            setFolders(response.data);
+            setFolders(response.data.data || []);
 
         } catch (error) {
 
@@ -52,7 +58,7 @@ export default function Folders() {
             }
 
             setFolders((prev) =>
-                prev.filter((item) => item._id !== id)
+                prev.filter((item) => (item.id ?? item._id) !== id)
             );
 
         } catch (error) {
@@ -65,14 +71,28 @@ export default function Folders() {
 
     useEffect(() => {
         getFolders();
-    }, []);
+    }, [categoryId]);
 
     return (
 
         <div className="container-fluid px-0">
 
+            {categoryName && (
+                <div className="d-flex align-items-center gap-1 px-4 pt-4 mb-2">
+
+
+
+                    <span className="fw-semibold" style={{ cursor: "pointer" }}
+                        onClick={() => router.push("/category")}>
+                        {categoryName}
+                    </span>
+                    <i className="ri-arrow-right-s-line text-muted"></i>
+
+                </div>
+            )}
+
             {/* Header */}
-            <div className="card p-4 mb-4">
+            <div className=" p-4 mb-4">
 
                 <div className="d-flex justify-content-between align-items-center">
 
@@ -89,7 +109,7 @@ export default function Folders() {
                     </div>
 
                     <button
-                        className="btn btn-primary"
+                        className="btn dotted-btn"
                         onClick={() => setShowModal(true)}
                     >
                         + Add Folder
@@ -105,6 +125,8 @@ export default function Folders() {
                 <AddFolderModal
                     onClose={() => setShowModal(false)}
                     refreshFolders={getFolders}
+                    initialCategoryId={categoryId || ""}
+                    initialCategoryName={categoryName || ""}
                 />
 
             )}
@@ -119,8 +141,9 @@ export default function Folders() {
 
             )}
 
-            {/* Folder Cards */}
-            <div className="row">
+
+            {/* Folder Wrapper */}
+            <div className="folder-grid px-4">
 
                 {folders.map((item, index) => {
 
@@ -137,158 +160,22 @@ export default function Folders() {
 
                     return (
 
-                        <div
-                            className="col-sm-6 col-lg-3 mb-4"
-                            key={item._id}
-                        >
-                            <div
-                                className={`card card-border-shadow-${color} h-100 folder-card`}
-                                style={{ cursor: "pointer" }}
-                                onClick={() => {
-                                    router.push(`/folders/${item._id}`);
-                                }}
-                            >
-
-                                <div className="card-body">
-
-                                    {/* Top */}
-                                    <div className="d-flex align-items-start justify-content-between mb-3">
-
-                                        {/* Folder Icon + Name */}
-                                        <div className="d-flex align-items-center">
-
-                                            <div className="avatar me-3">
-
-                                                <span className={`avatar-initial rounded-3 bg-label-${color}`}>
-
-                                                    <i className="ri-folder-2-line ri-24px"></i>
-
-                                                </span>
-
-                                            </div>
-
-                                            <div>
-
-                                                <h6 className="mb-1 fw-semibold">
-
-                                                    {item.name}
-
-                                                </h6>
-
-                                                <p className="mb-0 text-muted small">
-
-                                                    {item.categoryId?.name}
-
-                                                </p>
-
-                                            </div>
-
-                                        </div>
-
-                                        {/* Hover Actions */}
-                                        <div className="folder-actions">
-
-                                            {/* Edit */}
-                                            <button
-                                                className="btn btn-sm btn-icon btn-text-secondary"
-                                                onClick={(e) => {
-
-                                                    e.stopPropagation();
-
-                                                    setSelectedFolder(item);
-
-                                                    setEditModal(true);
-
-                                                }}
-                                            >
-
-                                                <i className="ri-edit-line"></i>
-
-                                            </button>
-
-                                            {/* Delete */}
-                                            <button
-                                                className="btn btn-sm btn-icon btn-text-danger"
-                                                onClick={(e) => {
-
-                                                    e.stopPropagation();
-
-                                                    if (window.confirm("Delete this folder?")) {
-
-                                                        deleteFolder(item._id);
-
-                                                    }
-
-                                                }}
-                                            >
-
-                                                <i className="ri-delete-bin-line"></i>
-
-                                            </button>
-
-                                        </div>
-
-                                    </div>
-
-                                    {/* Files */}
-                                    {/* {openFolder === item._id && (
-
-                                        <div className="mt-4">
-
-                                            <hr />
-
-                                            <h6 className="mb-3">
-                                                Folder Files
-                                            </h6>
-
-                                            {item.files?.length > 0 ? (
-
-                                                item.files.map((file) => (
-
-                                                    <div
-                                                        key={file._id}
-                                                        className="border rounded p-2 mb-2 d-flex justify-content-between align-items-center"
-                                                    >
-
-                                                        <div className="d-flex align-items-center">
-
-                                                            <i className="ri-file-pdf-line text-danger me-2"></i>
-
-                                                            <span>
-                                                                {file.title}
-                                                            </span>
-
-                                                        </div>
-
-                                                        <a
-                                                            href={file.fileUrl}
-                                                            target="_blank"
-                                                            className="btn btn-sm btn-primary"
-                                                        >
-                                                            View
-                                                        </a>
-
-                                                    </div>
-
-                                                ))
-
-                                            ) : (
-
-                                                <p className="text-muted mb-0">
-                                                    No files uploaded
-                                                </p>
-
-                                            )}
-
-                                        </div>
-
-                                    )} */}
-
-                                </div>
-
-                            </div>
-
-                        </div>
+                        <FolderCard
+                            key={item.id ?? item._id}
+                            item={item}
+                            color={color}
+                            categoryId={categoryId}
+                            categoryName={categoryName}
+                            onEdit={(folder) => {
+                                setSelectedFolder(folder);
+                                setEditModal(true);
+                            }}
+                            onDelete={(folder) => {
+                                if (window.confirm("Delete this folder?")) {
+                                    deleteFolder(folder.id ?? folder._id);
+                                }
+                            }}
+                        />
 
                     );
 
@@ -298,6 +185,16 @@ export default function Folders() {
 
         </div>
 
+    );
+
+}
+
+export default function Folders() {
+
+    return (
+        <Suspense fallback={null}>
+            <FoldersContent />
+        </Suspense>
     );
 
 }

@@ -31,3 +31,149 @@
 
     transform: translateY(0);
 }
+
+.folder-ui-card {
+    position: relative;
+
+    background: #fff;
+    border: 1px solid #ececec;
+
+    border-radius: 18px;
+
+    height: 150px;
+
+    padding: 20px;
+
+    cursor: pointer;
+
+    transition: all 0.25s ease;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.folder-ui-card:hover {
+    transform: translateY(-4px);
+
+    box-shadow:
+        0 10px 30px rgba(0,0,0,0.05);
+}
+
+.folder-icon-area {
+    margin-bottom: 14px;
+}
+
+.folder-big-icon {
+    font-size: 68px;
+    color: #7B83FF;
+}
+
+.folder-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: #333;
+
+    text-align: center;
+
+    width: 100%;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.folder-top-menu {
+    position: absolute;
+
+    top: 10px;
+    right: 10px;
+}
+
+.folder-top-menu .btn {
+    padding: 4px 8px;
+}
+
+.folder-top-menu .ri-more-2-fill {
+    font-size: 18px;
+    color: #888;
+}
+
+
+
+.icloud-folder-card {
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.icloud-folder-card:hover {
+    transform: translateY(-2px);
+}
+
+/* .icloud-folder-box {
+
+    width: 100%;
+    aspect-ratio: 1 / 1;
+
+    background: #fff;
+
+    border: 1px solid #ededed;
+    border-radius: 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: all 0.25s ease;
+} */
+
+.icloud-folder-box:hover {
+
+    border-color: #dddddd;
+
+    box-shadow:
+        0 4px 20px rgba(0,0,0,0.04);
+
+}
+
+.icloud-folder-icon {
+
+    font-size: 100%;
+    color: #7f8cff;
+
+    line-height: 1;
+
+}
+
+.icloud-folder-name {
+
+    margin-top: 14px;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    color: #222;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.icloud-folder-actions {
+
+    position: absolute;
+
+    top: 10px;
+    right: 10px;
+
+    opacity: 0;
+    transition: 0.2s ease;
+
+    z-index: 5;
+}
+
+.icloud-folder-card:hover .icloud-folder-actions {
+    opacity: 1;
+}

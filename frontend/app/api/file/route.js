@@ -1,47 +1,53 @@
-import connectDB from "@/lib/db";
-import { errorResponse, json } from "@/lib/api-response";
+import db from "@/lib/db";
 
-import Folder from "@/models/Folder";
+import {
+    errorResponse,
+    json
+} from "@/lib/api-response";
 
-import { cloudinary } from "@/lib/cloudinary";
-import { getPublicFileUrl } from "@/lib/cloudinary-file-view";
-import { serializeFolderFiles, serializeFolderFile } from "@/lib/folder-files";
+import fs from "fs";
+import path from "path";
+
+import { v4 as uuidv4 } from "uuid";
 
 export const runtime = "nodejs";
 
-function sanitizePathPart(value) {
-    return value
-        .trim()
-        .replace(/\.[^/.]+$/, "")
-        .replace(/[^a-zA-Z0-9-_]+/g, "-")
-        .replace(/^-+|-+$/g, "")
-        .toLowerCase() || "file";
+
+
+
+
+function sanitizeFilename(name) {
+
+    return name
+        .replace(/[^a-zA-Z0-9.]/g, "_");
+
 }
 
-function sanitizeFilename(value) {
-    const parts = value.trim().split(".");
-    const extension = parts.length > 1 ? parts.pop() : "";
-    const name = sanitizePathPart(parts.join(".") || value);
 
-    return extension
-        ? `${name}.${extension.toLowerCase().replace(/[^a-z0-9]/g, "")}`
-        : name;
-}
+
+
 
 
 // GET FILES
-export async function GET(request) {
+export async function GET() {
 
     try {
 
-        await connectDB();
+        const [files] = await db.query(
 
-        const folders = await Folder.find().populate("categoryId");
-        const files = folders.flatMap((folder) =>
-            serializeFolderFiles(folder, request)
+            `SELECT
+                files.*,
+                folders.name AS folder_name
+             FROM files
+             LEFT JOIN folders
+             ON files.folder_id = folders.id
+             ORDER BY files.created_at DESC`
         );
 
-        return json(files);
+        return json({
+            success: true,
+            data: files
+        });
 
     } catch (error) {
 
@@ -52,20 +58,39 @@ export async function GET(request) {
 }
 
 
+
+
+
+
+
+
+
 // UPLOAD FILES
 export async function POST(request) {
 
     try {
 
-        await connectDB();
+        const formData =
+            await request.formData();
 
-        const formData = await request.formData();
+        const folderId =
+            formData.get("folderId");
 
-        const folderId = formData.get("folderId");
+        const uploadedFiles =
+            formData.getAll("files");
 
-        const uploadedFiles = formData.getAll("files");
+        // Check folder exists
+        const [folderRows] =
+            await db.query(
 
-        const folder = await Folder.findById(folderId);
+                `SELECT *
+                 FROM folders
+                 WHERE id = ?`,
+
+                [folderId]
+            );
+
+        const folder = folderRows[0];
 
         if (!folder) {
 
@@ -73,75 +98,90 @@ export async function POST(request) {
                 success: false,
                 message: "Folder not found"
             }, 404);
-
         }
 
         const savedFiles = [];
 
+        // Upload path
+        const uploadDir = path.join(
+
+            process.cwd(),
+
+            "public",
+
+            "uploads"
+        );
+
+        // Create uploads folder
+        if (!fs.existsSync(uploadDir)) {
+
+            fs.mkdirSync(uploadDir, {
+                recursive: true
+            });
+        }
+
+        // Save files
         for (const file of uploadedFiles) {
 
             if (!file || file.size === 0) {
                 continue;
             }
 
-            const bytes = await file.arrayBuffer();
+            const bytes =
+                await file.arrayBuffer();
 
-            const buffer = Buffer.from(bytes);
+            const buffer =
+                Buffer.from(bytes);
 
-            const publicId =
-                `${sanitizePathPart(folder.name)}/${sanitizeFilename(file.name)}`;
+            // Unique filename
+            const uniqueName =
+                `${uuidv4()}-${sanitizeFilename(file.name)}`;
 
-            const uploaded = await new Promise((resolve, reject) => {
+            const filePath =
+                path.join(uploadDir, uniqueName);
 
-                const stream = cloudinary.uploader.upload_stream(
-                    {
-                        public_id: publicId,
-                        resource_type: "raw",
+            // Save physical file
+            fs.writeFileSync(
+                filePath,
+                buffer
+            );
 
-                        overwrite: true
-                    },
-                    (error, result) => {
+            const fileUrl =
+                `/uploads/${uniqueName}`;
 
-                        if (error) {
+            // Save DB record
+            const [result] =
+                await db.query(
 
-                            reject(error);
+                    `INSERT INTO files
+                    (
+                        name,
+                        file_url,
+                        folder_id
+                    )
+                    VALUES (?, ?, ?)`,
 
-                        } else {
-
-                            resolve(result);
-                        }
-                    }
+                    [
+                        file.name,
+                        fileUrl,
+                        folderId
+                    ]
                 );
 
-                stream.end(buffer);
+            // Get inserted file
+            const [rows] =
+                await db.query(
 
-            });
-            const fileData = {
+                    `SELECT *
+                     FROM files
+                     WHERE id = ?`,
 
-                title: file.name,
+                    [result.insertId]
+                );
 
-                fileUrl: getPublicFileUrl({
-                    publicId: uploaded.public_id
-                }, request),
-
-                publicId: uploaded.public_id,
-
-                resourceType: "raw",
-
-                fileType: file.type,
-
-                size: file.size
-
-            };
-
-            folder.files.push(fileData);
-            const newFile = folder.files[folder.files.length - 1];
-
-            savedFiles.push(serializeFolderFile(newFile, folder, request));
+            savedFiles.push(rows[0]);
 
         }
-
-        await folder.save();
 
         return json({
             success: true,

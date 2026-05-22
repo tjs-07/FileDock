@@ -3,6 +3,8 @@
 import FileCard from "../../../component/FileCard";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import Category from "../category/page";
+import CategoryCard from "@/component/CategoryCard";
 
 export default function Dashboard() {
 
@@ -21,7 +23,7 @@ export default function Dashboard() {
             await axios.delete(`/api/file/${id}`);
 
             setRecentFiles((prev) =>
-                prev.filter((item) => item._id !== id)
+                prev.filter((item) => (item.id ?? item._id) !== id)
             );
 
         } catch (error) {
@@ -33,6 +35,33 @@ export default function Dashboard() {
     };
 
     const [recentFiles, setRecentFiles] = useState([]);
+
+    const [categoris, setcategories] = useState([]);
+
+    const deleteCategory = async (id) => {
+
+        try {
+
+            const response = await axios.delete(`/api/category/${id}`);
+
+            if (!response.data.success) {
+                throw new Error(response.data.message || "Category was not deleted");
+            }
+
+            setcategories((prev) =>
+                prev.filter((item) => (item.id ?? item._id) !== id)
+            );
+
+            getDashboardData();
+
+        } catch (error) {
+
+            console.log(error);
+
+        }
+
+    };
+
 
     const getDashboardData = async () => {
 
@@ -48,7 +77,7 @@ export default function Dashboard() {
                 "/api/recent-files"
             );
 
-            setRecentFiles(filesResponse.data);
+            setRecentFiles(filesResponse.data.data || []);
 
         } catch (error) {
 
@@ -58,14 +87,25 @@ export default function Dashboard() {
 
     };
 
+    const getCategories = async () => {
+        try {
+            const response = await axios.get("api/category");
+            setcategories(response.data.data);
+        }catch(error){
+            console.log(error);
+        }
+    };
+
+
     useEffect(() => {
         getDashboardData();
+        getCategories();
     }, []);
 
     const getFilePath = (file) =>
-        file.viewUrl || file.fileUrl || (file.publicId
+        file.viewUrl || file.file_url || file.fileUrl || (file.publicId
             ? `/${file.publicId.split("/").map(encodeURIComponent).join("/")}`
-            : `/api/file/${file._id}`);
+            : `/api/file/${file.id ?? file._id}`);
 
     return (
 
@@ -246,9 +286,9 @@ export default function Dashboard() {
 
                     <div className="d-flex justify-content-between align-items-center mb-4">
 
-                        <h5 className="mb-0">
-                            Recent Uploaded Files
-                        </h5>
+                        <h4 className="mb-0">
+                            Recent Uploaded Categories
+                        </h4>
 
                     </div>
 
@@ -257,24 +297,27 @@ export default function Dashboard() {
             
             </div>
 
-                    <div className="row">
+                    <div className="row gy-5">
 
-                        {recentFiles.map((item, index) => (
+                        {categoris.map((item, index) => (
 
-                            <FileCard
-                                key={item._id}
-                                item={item}
-                                index={index}
-                                getFilePath={getFilePath}
-                                deleteFile={deleteFile}
+                            <CategoryCard
+                               key={item.id ?? item._id}
+                                    item={item}
+                                    index={index}
+                                    onEdit={() => {}}
+                                    onDelete={(id) => {
+
+                                        if (window.confirm("Delete this category?")) {
+                                            deleteCategory(id);
+                                        }
+
+                                    }}
                             />
 
                         ))}
 
                     </div>
-
-                
-
 
         </div>
 

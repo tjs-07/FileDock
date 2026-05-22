@@ -38,3 +38,17 @@
 
     border-radius: 10px;
 }
+
+
+.category-name {
+    /* font-size: 22px; */
+    font-weight: 600;
+    color: #1f2b5b;
+
+    line-height: 1.4;
+
+    white-space: normal;
+    word-break: break-word;
+
+    max-width: 220px;
+}

@@ -1,43 +1,55 @@
-import connectDB from "@/lib/db";
-import { errorResponse, json } from "@/lib/api-response";
-import Category from "@/models/Category";
-import Folder from "@/models/Folder";
+import db from "@/lib/db";
+
+import {
+    errorResponse,
+    json
+} from "@/lib/api-response";
 
 export const runtime = "nodejs";
 
-export async function GET() {
-    try {
-        await connectDB();
 
-        const totalCategories = await Category.countDocuments();
-        const totalFolders = await Folder.countDocuments();
-        const fileStats = await Folder.aggregate([
-            {
-                $project: {
-                    fileCount: {
-                        $size: {
-                            $ifNull: ["$files", []]
-                        }
-                    }
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-                    totalFiles: {
-                        $sum: "$fileCount"
-                    }
-                }
-            }
-        ]);
-        const totalFiles = fileStats[0]?.totalFiles || 0;
+
+export async function GET() {
+
+    try {
+
+        // Total Categories
+        const [categoryRows] = await db.query(
+
+            `SELECT COUNT(*) AS totalCategories
+             FROM categories`
+        );
+
+        // Total Folders
+        const [folderRows] = await db.query(
+
+            `SELECT COUNT(*) AS totalFolders
+             FROM folders`
+        );
+
+        // Total Files
+        const [fileRows] = await db.query(
+
+            `SELECT COUNT(*) AS totalFiles
+             FROM files`
+        );
 
         return json({
-            totalCategories,
-            totalFolders,
-            totalFiles
+
+            totalCategories:
+                categoryRows[0].totalCategories,
+
+            totalFolders:
+                folderRows[0].totalFolders,
+
+            totalFiles:
+                fileRows[0].totalFiles
         });
+
     } catch (error) {
+
         return errorResponse(error);
+
     }
+
 }

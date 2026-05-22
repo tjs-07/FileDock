@@ -13,6 +13,7 @@ export default function EditCategoryModal({
     const [name, setName] = useState(category?.name || "");
 
     const [loading, setLoading] = useState(false);
+    const categoryId = category?.id ?? category?._id;
 
     const updateCategory = async (e) => {
 
@@ -23,7 +24,7 @@ export default function EditCategoryModal({
             setLoading(true);
 
             const response = await axios.put(
-                `/api/category/${category._id}`,
+                `/api/category/${categoryId}`,
                 { name: name.trim() }
             );
 

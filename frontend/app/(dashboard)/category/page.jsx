@@ -5,7 +5,7 @@ import axios from "axios";
 
 import AddCategoryModal from "../../../component/AddCategoryModal";
 import EditCategoryModal from "../../../component/EditCategoryModal";
-
+import CategoryCard from "../../../component/CategoryCard";
 import "./category.css";
 
 export default function Category() {
@@ -52,7 +52,7 @@ export default function Category() {
             }
 
             setCategories((prev) =>
-                prev.filter((item) => item._id !== id)
+                prev.filter((item) => (item.id ?? item._id) !== id)
             );
 
         } catch (error) {
@@ -70,11 +70,7 @@ export default function Category() {
     // Colors
     const colors = [
         "primary",
-        "success",
-        "danger",
-        "warning",
-        "info",
-        "secondary",
+
     ];
 
     return (
@@ -82,7 +78,7 @@ export default function Category() {
         <div className="container-fluid px-0 category-page">
 
             {/* Header */}
-            <div className="card d-flex flex-row align-items-center justify-content-between p-4 mb-4">
+            <div className=" d-flex flex-row align-items-center justify-content-between p-4 mb-4">
 
                 <div>
 
@@ -139,91 +135,25 @@ export default function Category() {
 
                             return (
 
-                                <div
-                                    className="col-lg-3 col-sm-6"
-                                    key={item._id}
-                                >
+                                <CategoryCard
+                                    key={item.id ?? item._id}
+                                    item={item}
+                                    index={index}
+                                    color={color}
+                                    onEdit={(item) => {
 
-                                    <div className="card category-card">
+                                        setSelectedCategory(item);
+                                        setEditModal(true);
 
-                                        <div className="card-body">
+                                    }}
+                                    onDelete={(id) => {
 
-                                            <div className="d-flex align-items-center justify-content-between">
+                                        if (window.confirm("Delete this category?")) {
+                                            deleteCategory(id);
+                                        }
 
-                                                {/* Left Side */}
-                                               <div className="d-flex align-items-start">
-                                                    <div className="avatar me-3">
-
-                                                        <div className={`avatar-initial bg-label-${color} rounded-3`}>
-
-                                                            <span className="category-icon">
-                                                                <i class="ri-gallery-view-2"></i>
-                                                            </span>
-
-                                                        </div>
-
-                                                    </div>
-
-                                                    <div className="card-info">
-
-                                                        <div className="d-flex align-items-center" >
-
-                                                            
-                                                            <h6 className="mb-0 category-name">
-    {item.name}
-</h6>
-                                                              
-
-                                                        </div>
-
-                                                        <small className="text-muted">
-                                                            Category #{index + 1}
-                                                        </small>
-
-                                                    </div>
-
-                                                </div>
-
-                                                {/* Delete Button */}
-                                                <div className="category-actions">
-
-                                                    {/* Edit */}
-                                                    <button
-                                                        className="btn btn-sm btn-icon btn-text-secondary edit-btn"
-                                                        onClick={() => {
-
-                                                            setSelectedCategory(item);
-
-                                                            setEditModal(true);
-
-                                                        }}
-                                                    >
-                                                        <i className="ri-edit-line"></i>
-                                                    </button>
-
-                                                    {/* Delete */}
-                                                    <button
-                                                        className="btn btn-sm btn-icon btn-text-danger delete-btn"
-                                                        onClick={() => {
-
-                                                            if (window.confirm("Delete this category?")) {
-                                                                deleteCategory(item._id);
-                                                            }
-
-                                                        }}
-                                                    >
-                                                        <i className="ri-delete-bin-line"></i>
-                                                    </button>
-
-                                                </div>
-
-                                            </div>
-
-                                        </div>
-
-                                    </div>
-
-                                </div>
+                                    }}
+                                />
 
                             );
 

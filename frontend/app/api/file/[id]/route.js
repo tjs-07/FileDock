@@ -1,62 +1,52 @@
-import connectDB from "@/lib/db";
-import { errorResponse, json } from "@/lib/api-response";
+import db from "@/lib/db";
 
-import Folder from "@/models/Folder";
+import {
+    errorResponse,
+    json
+} from "@/lib/api-response";
 
-import { cloudinary } from "@/lib/cloudinary";
-import { streamFileInline } from "@/lib/cloudinary-file-view";
-import { findFolderFile } from "@/lib/folder-files";
-import mongoose from "mongoose";
+import fs from "fs";
+import path from "path";
 
 export const runtime = "nodejs";
+
 export const dynamic = "force-dynamic";
+
+
+
+
 
 export async function GET(_request, context) {
 
     try {
 
-        await connectDB();
-
         const { id } = await context.params;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return json({
-                success: false,
-                message: "Invalid file id"
-            }, 400);
-        }
+        // Get file from DB
+        const [rows] = await db.query(
 
-        const folder = await Folder.findOne({
-            "files._id": id
-        });
-        const file = folder ? findFolderFile(folder, id) : null;
+            `SELECT *
+             FROM files
+             WHERE id = ?`,
 
+            [id]
+        );
+
+        const file = rows[0];
+
+        // File not found
         if (!file) {
+
             return json({
                 success: false,
                 message: "File not found"
             }, 404);
         }
 
-        if (!file.publicId && file.fileUrl?.includes("onrender.com/uploads/")) {
-            return json({
-                success: false,
-                message: "This file was uploaded before Cloudinary setup and the old upload URL is no longer available. Please re-upload this file."
-            }, 410);
-        }
-
-        const response = await streamFileInline(file);
-
-        if (response.error) {
-            return json({
-                success: false,
-                message: file.publicId
-                    ? "Unable to load file from Cloudinary"
-                    : "Unable to load legacy file URL. Please re-upload this file."
-            }, response.status);
-        }
-
-        return response;
+        return json({
+            success: true,
+            data: file
+        });
 
     } catch (error) {
 
@@ -66,26 +56,32 @@ export async function GET(_request, context) {
 
 }
 
+
+
+
+
+
+
+
 export async function DELETE(_request, context) {
 
     try {
 
-        await connectDB();
-
         const { id } = await context.params;
 
-        if (!mongoose.Types.ObjectId.isValid(id)) {
-            return json({
-                success: false,
-                message: "Invalid file id"
-            }, 400);
-        }
+        // Find file
+        const [rows] = await db.query(
 
-        const folder = await Folder.findOne({
-            "files._id": id
-        });
-        const file = folder ? findFolderFile(folder, id) : null;
+            `SELECT *
+             FROM files
+             WHERE id = ?`,
 
+            [id]
+        );
+
+        const file = rows[0];
+
+        // File not found
         if (!file) {
 
             return json({
@@ -95,25 +91,31 @@ export async function DELETE(_request, context) {
 
         }
 
-        if (file.publicId) {
-            // Delete Cloudinary File
-            const result = await cloudinary.uploader.destroy(
-                file.publicId,
-                {
-                    resource_type: file.resourceType || "raw"
-                }
-            );
+        // Physical file path
+        const filePath = path.join(
 
-            if (result.result !== "ok" && result.result !== "not found") {
-                return json({
-                    success: false,
-                    message: "Cloudinary file was not deleted"
-                }, 502);
-            }
+            process.cwd(),
+
+            "public",
+
+            file.file_url
+        );
+
+        // Delete physical file
+        if (fs.existsSync(filePath)) {
+
+            fs.unlinkSync(filePath);
+
         }
 
-        file.deleteOne();
-        await folder.save();
+        // Delete DB record
+        await db.query(
+
+            `DELETE FROM files
+             WHERE id = ?`,
+
+            [id]
+        );
 
         return json({
             success: true,
