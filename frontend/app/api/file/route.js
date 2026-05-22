@@ -14,9 +14,6 @@ import { getFolderUploadTarget } from "@/lib/folder-upload-path";
 export const runtime = "nodejs";
 
 
-
-
-
 function sanitizeFilename(name) {
 
     return name
@@ -57,14 +54,6 @@ export async function GET() {
     }
 
 }
-
-
-
-
-
-
-
-
 
 // UPLOAD FILES
 export async function POST(request) {

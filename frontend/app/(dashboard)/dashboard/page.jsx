@@ -1,9 +1,7 @@
 "use client";
 
-import FileCard from "../../../component/FileCard";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Category from "../category/page";
 import CategoryCard from "../../../component/CategoryCard";
 import AddCategoryModal from "../../../component/AddCategoryModal";
 import EditCategoryModal from "../../../component/EditCategoryModal";
@@ -16,8 +14,12 @@ export default function Dashboard() {
 
     const [showAddCategoryModal, setShowAddCategoryModal] = useState(false);
 
-    const [showAddFileModal, setShowAddFileModal] = useState(false);    
-    
+    const [editCategoryModal, setEditCategoryModal] = useState(false);
+
+    const [selectedCategory, setSelectedCategory] = useState(null);
+
+    const [showAddFileModal, setShowAddFileModal] = useState(false);
+
     const [showAddFolderModal, setShowAddFolderModal] = useState(false);
 
     const [stats, setStats] = useState({
@@ -27,26 +29,6 @@ export default function Dashboard() {
         totalFiles: 0
 
     });
-
-    const deleteFile = async (id) => {
-
-        try {
-
-            await axios.delete(`/api/file/${id}`);
-
-            setRecentFiles((prev) =>
-                prev.filter((item) => (item.id ?? item._id) !== id)
-            );
-
-        } catch (error) {
-
-            console.log(error);
-
-        }
-
-    };
-
-    const [recentFiles, setRecentFiles] = useState([]);
 
     const [categoris, setcategories] = useState([]);
 
@@ -85,12 +67,6 @@ export default function Dashboard() {
 
             setStats(statsResponse.data);
 
-            const filesResponse = await axios.get(
-                "/api/recent-files"
-            );
-
-            setRecentFiles(filesResponse.data.data || []);
-
         } catch (error) {
 
             console.log(error);
@@ -103,21 +79,20 @@ export default function Dashboard() {
         try {
             const response = await axios.get("api/category");
             setcategories(response.data.data);
-        }catch(error){
+        } catch (error) {
             console.log(error);
         }
     };
 
 
     useEffect(() => {
-        getDashboardData();
-        getCategories();
-    }, []);
+        const timeoutId = setTimeout(() => {
+            getDashboardData();
+            getCategories();
+        }, 0);
 
-    const getFilePath = (file) =>
-        file.viewUrl || file.file_url || file.fileUrl || (file.publicId
-            ? `/${file.publicId.split("/").map(encodeURIComponent).join("/")}`
-            : `/api/file/${file.id ?? file._id}`);
+        return () => clearTimeout(timeoutId);
+    }, []);
 
     return (
 
@@ -128,47 +103,56 @@ export default function Dashboard() {
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <div className="mb-4">
 
-                <h3 className="mb-1">
-                    Welcome Back
-                </h3>
+                    <h3 className="mb-1">
+                        Welcome Back
+                    </h3>
 
-                <p className="text-muted mb-0">
-                    Investor Portal Dashboard
-                </p>
+                    <p className="text-muted mb-0">
+                        Investor Portal Dashboard
+                    </p>
 
-            </div>
-            <div className="d-flex gap-2">
-                            <button className="btn btn-primary" onClick={() => setShowAddCategoryModal(true)}>
-                                Add Category
-                            </button>
-                            <button className="btn dotted-btn" onClick={() => setShowAddFolderModal(true)}>
-                                Add Folder
-                            </button>
-                            <button className="btn file-btn" onClick={() => setShowAddFileModal(true)}>
-                                Add File
-                            </button>
-                        </div>
-                         {showAddCategoryModal && (
-                        
-                                        <AddCategoryModal
-                                            onClose={() => setShowAddCategoryModal(false)}
-                                            refreshCategories={getCategories}
-                                        />
-                        
-                                    )}
-                                    {showAddFileModal && (
-                                        <AddFileModal
-                                            onClose={() => setShowAddFileModal(false)}
-                                            refreshFiles={getDashboardData}
-                                            />
-                                    )}
-                                    {showAddFolderModal && (
-                                        <AddFolderModal 
-                                        onClose ={()=>setShowAddFolderModal(false)}
-                                        refreshFolders={getDashboardData}
-                                        />
-                                    )}  
                 </div>
+                <div className="d-flex gap-2">
+                    <button className="btn btn-primary" onClick={() => setShowAddCategoryModal(true)}>
+                        Add Category
+                    </button>
+                    <button className="btn dotted-btn" onClick={() => setShowAddFolderModal(true)}>
+                        Add Folder
+                    </button>
+                    <button className="btn file-btn" onClick={() => setShowAddFileModal(true)}>
+                        Add File
+                    </button>
+                </div>
+                {showAddCategoryModal && (
+
+                    <AddCategoryModal
+                        onClose={() => setShowAddCategoryModal(false)}
+                        refreshCategories={getCategories}
+                    />
+
+                )}
+                {editCategoryModal && (
+
+                    <EditCategoryModal
+                        category={selectedCategory}
+                        onClose={() => setEditCategoryModal(false)}
+                        refreshCategories={getCategories}
+                    />
+
+                )}
+                {showAddFileModal && (
+                    <AddFileModal
+                        onClose={() => setShowAddFileModal(false)}
+                        refreshFiles={getDashboardData}
+                    />
+                )}
+                {showAddFolderModal && (
+                    <AddFolderModal
+                        onClose={() => setShowAddFolderModal(false)}
+                        refreshFolders={getDashboardData}
+                    />
+                )}
+            </div>
 
             {/* STATISTICS */}
 
@@ -343,30 +327,33 @@ export default function Dashboard() {
 
                 </div>
 
-            
+
             </div>
 
-                    <div className="row gy-5">
+            <div className="row gy-5">
 
-                        {categoris.map((item, index) => (
+                {categoris.map((item, index) => (
 
-                            <CategoryCard
-                               key={item.id ?? item._id}
-                                    item={item}
-                                    index={index}
-                                    onEdit={() => {}}
-                                    onDelete={(id) => {
+                    <CategoryCard
+                        key={item.id ?? item._id}
+                        item={item}
+                        index={index}
+                        onEdit={(category) => {
+                            setSelectedCategory(category);
+                            setEditCategoryModal(true);
+                        }}
+                        onDelete={(id) => {
 
-                                        if (window.confirm("Delete this category?")) {
-                                            deleteCategory(id);
-                                        }
+                            if (window.confirm("Delete this category?")) {
+                                deleteCategory(id);
+                            }
 
-                                    }}
-                            />
+                        }}
+                    />
 
-                        ))}
+                ))}
 
-                    </div>
+            </div>
 
         </div>
 

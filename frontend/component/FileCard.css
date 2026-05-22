@@ -96,13 +96,13 @@
     color: #ef5350 !important;
 }
 
-    .file-name {
-        margin-top: 10px;
+.file-name {
+    margin-top: 10px;
 
-        width: 100%;
+    width: 100%;
 
-        text-align: center;
-    }
+    text-align: center;
+}
 
 .file-name span {
     display: block;
@@ -114,9 +114,9 @@
 
     color: #1f2937;
 
-   white-space: normal;
-word-break: break-word;
-line-height: 1.4;
+    white-space: normal;
+    word-break: break-word;
+    line-height: 1.4;
 }
 
 .file-icon,
@@ -157,9 +157,10 @@ line-height: 1.4;
 .video-icon {
     color: #e53935;
 }
+
 .file-card-box {
     height: 120px;
-}   
+}
 
 .file-card-icon {
     width: 80%;
@@ -171,5 +172,5 @@ line-height: 1.4;
 }
 
 .pdf-file-icon {
-    font-size: 70px !important;
+    font-size: 65px !important;
 }

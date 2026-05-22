@@ -10,7 +10,7 @@
 }
 
 .folder-grid {
-    display: flex;
+    display: flex;  
     flex-direction: row;
     flex-wrap: wrap;
 
@@ -68,7 +68,7 @@
 
 .folder-card-box:hover .folder-hover-actions {
     opacity: 1;
-}
+}   
 
 .folder-action-btn {
     width: 28px !important;
