@@ -129,7 +129,7 @@ export default function Category() {
                 <div className="row gy-5">
 
                     {Array.isArray(categories) &&
-                        categories.map((item, index) => {
+                        categories?.map((item, index) => {
 
                             const color = colors[index % colors.length];
 

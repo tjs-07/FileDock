@@ -332,7 +332,7 @@ export default function Dashboard() {
 
             <div className="row gy-5">
 
-                {categoris.map((item, index) => (
+                {categoris?.map((item, index) => (
 
                     <CategoryCard
                         key={item.id ?? item._id}
