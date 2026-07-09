@@ -90,7 +90,7 @@ export default function Sidebar() {
 
                 {/* FILES */}
 
-                {/* <li className={`menu-item ${pathname === "/files" ? "active" : ""}`}>
+                <li className={`menu-item ${pathname === "/files" ? "active" : ""}`}>
 
                     <Link href="/files" className="menu-link" onClick={closeMobileMenu}>
 
@@ -100,7 +100,7 @@ export default function Sidebar() {
 
                     </Link>
 
-                </li> */}
+                </li>
 
             </ul>
 
