@@ -115,12 +115,12 @@ export default function Login() {
                                         </svg>
                                     </span>
                                 </span>
-                                <span className="app-brand-text demo text-heading fw-semibold">Materialize</span>
+                                <span className="app-brand-text demo text-heading fw-semibold">FileDock</span>
                             </a>
                         </div>
 
                         <div className="card-body mt-1">
-                            <h4 className="mb-1">Welcome to UCAL 🚀</h4>
+                            <h4 className="mb-1">Welcome there 🚀</h4>
                             <p className="mb-5">Please sign-in to your account and start the adventure</p>
 
                             <form id="formAuthentication" className="mb-5" onSubmit={handleSubmit}>

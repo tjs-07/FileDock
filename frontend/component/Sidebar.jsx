@@ -27,14 +27,14 @@ export default function Sidebar() {
                     onClick={closeMobileMenu}
                 >
 
-                    <img
+                    {/* <img
                         src='/assets/img/logo.png'
                         alt="Logo"
                         style={{
                             height: "40px",
                             width: "auto"
                         }}
-                    />
+                    /> */}
 
                 </Link>
 
