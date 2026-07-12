@@ -13,9 +13,11 @@ export const runtime = "nodejs";
 
 const uploadToCloudinary = (fileBuffer, folderId, fileName) => {
     return new Promise((resolve, reject) => {
-        const nameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+        const lastDotIndex = fileName.lastIndexOf('.');
+        const extension = lastDotIndex !== -1 ? fileName.substring(lastDotIndex) : "";
+        const nameWithoutExtension = lastDotIndex !== -1 ? fileName.substring(0, lastDotIndex) : fileName;
         const cleanName = sanitizeFilename(nameWithoutExtension).replace(/\./g, "_");
-        const uniqueName = `${uuidv4()}-${cleanName}`;
+        const uniqueName = `${uuidv4()}-${cleanName}${extension}`;
 
         const uploadStream = cloudinary.uploader.upload_stream(
             {
