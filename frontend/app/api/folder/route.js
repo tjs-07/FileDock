@@ -5,13 +5,32 @@ import {
     json
 } from "@/lib/api-response";
 
-import fs from "fs";
-
 import { v4 as uuidv4 } from "uuid";
-
-import { getFolderUploadTarget } from "@/lib/folder-upload-path";
+import { cloudinary } from "@/lib/cloudinary";
+import path from "path";
 
 export const runtime = "nodejs";
+
+const uploadToCloudinary = (fileBuffer, folderId, fileName) => {
+    return new Promise((resolve, reject) => {
+        const nameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+        const cleanName = sanitizeFilename(nameWithoutExtension).replace(/\./g, "_");
+        const uniqueName = `${uuidv4()}-${cleanName}`;
+
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: `investor_portal/folder_${folderId}`,
+                public_id: uniqueName,
+                resource_type: "auto"
+            },
+            (error, result) => {
+                if (error) return reject(error);
+                resolve(result);
+            }
+        );
+        uploadStream.end(fileBuffer);
+    });
+};
 
 
 
@@ -194,29 +213,8 @@ export async function POST(request) {
             const buffer =
                 Buffer.from(bytes);
 
-            // Unique filename
-            const uniqueName =
-                `${uuidv4()}-${sanitizeFilename(file.name)}`;
-
-            const uploadTarget =
-                await getFolderUploadTarget(
-                    db,
-                    folderId,
-                    uniqueName
-                );
-
-            if (!fs.existsSync(uploadTarget.directoryPath)) {
-
-                fs.mkdirSync(uploadTarget.directoryPath, {
-                    recursive: true
-                });
-            }
-
-            // Save physical file
-            fs.writeFileSync(
-                uploadTarget.filePath,
-                buffer
-            );
+            // Upload to Cloudinary
+            const cloudinaryResult = await uploadToCloudinary(buffer, folderId, file.name);
 
             // Save DB record
             await db.query(
@@ -231,7 +229,7 @@ export async function POST(request) {
 
                 [
                     file.name,
-                    uploadTarget.fileUrl,
+                    cloudinaryResult.secure_url,
                     folderId
                 ]
             );
