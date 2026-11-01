@@ -58,10 +58,17 @@ const [showFileModal, setShowFileModal] = useState(false);
         getFiles();
     }, []);
 
-    const getFilePath = (file) =>
-        file.viewUrl || file.file_url || file.fileUrl || (file.publicId
+    const getFilePath = (file) => {
+        const fileId = file.id ?? file._id;
+
+        if (fileId) {
+            return `/api/file/${fileId}/view`;
+        }
+
+        return file.viewUrl || file.file_url || file.fileUrl || (file.publicId
             ? `/${file.publicId.split("/").map(encodeURIComponent).join("/")}`
-            : `/api/file/${file.id ?? file._id}`);
+            : "");
+    };
 
     const canViewFile = (file) =>
         Boolean(file.file_url || file.publicId || (file.fileUrl && !file.fileUrl.includes("onrender.com/uploads/")));
