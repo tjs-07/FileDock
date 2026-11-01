@@ -1,0 +1,59 @@
+/* File Card */
+.file-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Hover */
+.file-card:hover {
+    transform: translateY(-4px);
+}
+
+/* Actions Center */
+.file-actions {
+    position: absolute;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%) scale(0.8);
+
+    opacity: 0;
+    visibility: hidden;
+
+    transition: all 0.25s ease;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    z-index: 10;
+}
+
+/* Show Actions */
+.file-card:hover .file-actions {
+    opacity: 1;
+    visibility: visible;
+
+    transform: translate(-50%, -50%) scale(1);
+}
+
+/* Optional overlay effect */
+.file-card::after {
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background: rgba(255,255,255,0);
+
+    transition: all 0.25s ease;
+
+    pointer-events: none;
+}
+
+/* Overlay on hover */
+.file-card:hover::after {
+    background: rgba(255,255,255,0.6);
+}

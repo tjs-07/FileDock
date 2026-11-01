@@ -1,0 +1,44 @@
+.dotted-btn {
+    height: 44px;
+
+    border-radius: 12px !important;
+
+    border: 2px dashed #c7c9ff !important;
+
+    background: #f8f9ff !important;
+
+    color: #696cff !important;
+
+    font-weight: 600;
+
+    box-shadow: none !important;
+
+    transition: all 0.2s ease;
+}
+
+.dotted-btn:hover {
+    border-color: #696cff !important;
+
+    background: #eef0ff !important;
+}
+
+.file-btn {
+    height: 44px;
+
+    border-radius: 12px !important;
+
+    background: white !important;
+
+    border: 1px solid #dfe1ff !important;
+
+    color: #696cff !important;
+
+    font-weight: 600;
+
+    box-shadow: none !important;
+}
+
+.file-btn:hover {
+    background: #f5f6ff !important;
+    border-color: #696cff !important;
+}

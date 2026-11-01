@@ -1,0 +1,54 @@
+/* Card */
+.category-card {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+/* Actions hidden by default */
+.category-actions {
+    opacity: 0;
+    visibility: hidden;
+
+    transform: translateY(-6px);
+
+    transition: all 0.25s ease;
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Show actions on hover */
+.category-card:hover .category-actions {
+    opacity: 1;
+    visibility: visible;
+
+    transform: translateY(0);
+}
+
+/* Optional cleaner buttons */
+.category-actions .btn {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 10px;
+}
+
+
+.category-name {
+    /* font-size: 22px; */
+    font-weight: 600;
+    color: #1f2b5b;
+
+    line-height: 1.4;
+
+    white-space: normal;
+    word-break: break-word;
+
+    max-width: 220px;
+}
